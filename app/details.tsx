@@ -1,0 +1,177 @@
+import { useEffect, useState } from "react";
+import {
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
+import { Stack, useLocalSearchParams } from "expo-router";
+import { colorsByType } from "../constants/colors";
+
+interface PokemonType {
+    type: {
+        name: string;
+    };
+}
+
+interface PokemonMove {
+    move: {
+        name: string;
+        url: string;
+    };
+}
+
+interface Pokemon {
+    name: string;
+    sprites: {
+        front_default: string;
+        back_default: string;
+    };
+    types: PokemonType[];
+    moves: PokemonMove[];
+}
+
+export default function Details() {
+    const params = useLocalSearchParams<{ name: string }>();
+    const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+
+    useEffect(() => {
+        if (params.name) {
+            fetchPokemonByName(params.name);
+        }
+    }, [params.name]);
+
+    async function fetchPokemonByName(name: string) {
+        try {
+            const response = await fetch(
+                `https://pokeapi.co/api/v2/pokemon/${name}`
+            );
+            const data = await response.json();
+            setPokemon(data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    if (!pokemon) {
+        return <Text style={{ padding: 16 }}>Loading...</Text>;
+    }
+
+    const mainType = pokemon.types[0].type.name;
+    const backgroundColor =
+        colorsByType[mainType] + 50;
+
+    return (
+        <>
+            <Stack.Screen
+                options={{
+                    title: pokemon.name,
+                }}
+            />
+
+            <ScrollView
+                contentContainerStyle={[
+                    styles.container,
+                    { backgroundColor: backgroundColor + "33" }, // soft tint
+                ]}
+            >
+                <View
+                    style={[
+                        styles.card,
+                        { backgroundColor },
+                    ]}
+                >
+                    <Text style={styles.name}>
+                        {pokemon.name}
+                    </Text>
+
+                    <Text style={styles.type}>
+                        {pokemon.types
+                            .map(t => t.type.name)
+                            .join(", ")}
+                    </Text>
+
+                    <View style={styles.imagesRow}>
+                        <Image
+                            source={{ uri: pokemon.sprites.front_default }}
+                            style={styles.image}
+                        />
+                        <Image
+                            source={{ uri: pokemon.sprites.back_default }}
+                            style={styles.image}
+                        />
+                    </View>
+                    <View style={styles.movesContainer}>
+                        <Text style={styles.sectionTitle}>Moves</Text>
+
+                        <View style={styles.movesList}>
+                            {pokemon.moves.map((item) => (
+                                <Text
+                                    key={item.move.name}
+                                    style={styles.move}
+                                >
+                                    {item.move.name.replace("-", " ")}
+                                </Text>
+                            ))}
+                        </View>
+                    </View>
+
+                </View>
+            </ScrollView>
+        </>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        padding: 16,
+        gap: 16,
+    },
+    card: {
+        padding: 20,
+        borderRadius: 20,
+    },
+    name: {
+        fontSize: 28,
+        fontWeight: "bold",
+        textTransform: "capitalize",
+        textAlign: "center",
+    },
+    type: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "gray",
+        textTransform: "capitalize",
+        textAlign: "center",
+    },
+    imagesRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    image: {
+        width: 150,
+        height: 150,
+    },
+    movesContainer: {
+        marginTop: 24,
+    },
+    sectionTitle: {
+        fontSize: 22,
+        fontWeight: "bold",
+        marginBottom: 8,
+    },
+    movesList: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
+    },
+    move: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+        backgroundColor: "rgba(255,255,255,0.6)",
+        textTransform: "capitalize",
+    },
+
+});
