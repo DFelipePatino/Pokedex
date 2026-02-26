@@ -22,19 +22,40 @@ interface PokemonMove {
     };
 }
 
+interface PokemonAbility {
+    ability: {
+        name: string;
+        url: string;
+    };
+}
+
+interface PokemonLocationAreaEncounters {
+    location_area: {
+        name: string;
+        url: string;
+    };
+}
+
 interface Pokemon {
+    id: number;
     name: string;
     sprites: {
-        front_default: string;
-        back_default: string;
+        other: {
+            "official-artwork": {
+                front_default: string | null;
+                front_shiny: string | null;
+            };
+        };
     };
     types: PokemonType[];
     moves: PokemonMove[];
+    abilities: PokemonAbility[];
 }
 
 export default function Details() {
     const params = useLocalSearchParams<{ name: string }>();
     const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+    const [locationAreaEncounters, setLocationAreaEncounters] = useState<PokemonLocationAreaEncounters[] | null>(null);
 
     useEffect(() => {
         if (params.name) {
@@ -42,13 +63,34 @@ export default function Details() {
         }
     }, [params.name]);
 
+    useEffect(() => {
+        if (pokemon?.id) {
+            fetchLocationAreaEncounters(pokemon.id);
+        }
+    }, [pokemon?.id]);
+
     async function fetchPokemonByName(name: string) {
         try {
             const response = await fetch(
                 `https://pokeapi.co/api/v2/pokemon/${name}`
             );
             const data = await response.json();
+            // console.log(data);
             setPokemon(data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    // console.log(pokemon?.id, 'pokemon id');
+
+    async function fetchLocationAreaEncounters(id: number) {
+        try {
+            const response = await fetch(
+                `https://pokeapi.co/api/v2/pokemon/${id}/encounters`
+            );
+            const data = await response.json();
+            setLocationAreaEncounters(data);
         } catch (error) {
             console.log(error);
         }
@@ -94,18 +136,52 @@ export default function Details() {
 
                     <View style={styles.imagesRow}>
                         <Image
-                            source={{ uri: pokemon.sprites.front_default }}
+                            source={{ uri: pokemon.sprites.other["official-artwork"].front_default ?? undefined }}
                             style={styles.image}
                         />
-                        <Image
-                            source={{ uri: pokemon.sprites.back_default }}
-                            style={styles.image}
-                        />
+
                     </View>
-                    <View style={styles.movesContainer}>
+
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.sectionTitle}>Location Areas</Text>
+
+                        <View style={styles.infoList}>
+                            {locationAreaEncounters === null ? (
+                                <Text style={styles.move}>Loading location areas...</Text>
+                            ) : locationAreaEncounters.length === 0 ? (
+                                <Text style={styles.move}>No location area encounters</Text>
+                            ) : (
+                                locationAreaEncounters.map((item) => (
+                                    <Text
+                                        key={item.location_area.name}
+                                        style={styles.move}
+                                    >
+                                        {item.location_area.name.replace("-", " ")}
+                                    </Text>
+                                ))
+                            )}
+                        </View>
+
+                    </View>
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.sectionTitle}>Abilities</Text>
+
+                        <View style={styles.infoList}>
+                            {pokemon.abilities.map((item) => (
+                                <Text
+                                    key={item.ability.name}
+                                    style={styles.move}
+                                >
+                                    {item.ability.name.replace("-", " ")}
+                                </Text>
+                            ))}
+                        </View>
+                    </View>
+
+                    <View style={styles.infoContainer}>
                         <Text style={styles.sectionTitle}>Moves</Text>
 
-                        <View style={styles.movesList}>
+                        <View style={styles.infoList}>
                             {pokemon.moves.map((item) => (
                                 <Text
                                     key={item.move.name}
@@ -146,14 +222,15 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     imagesRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+        // flexDirection: "row",
+        // justifyContent: "space-between",
+        alignItems: "center",
     },
     image: {
         width: 150,
         height: 150,
     },
-    movesContainer: {
+    infoContainer: {
         marginTop: 24,
     },
     sectionTitle: {
@@ -161,7 +238,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 8,
     },
-    movesList: {
+    infoList: {
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 8,

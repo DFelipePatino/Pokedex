@@ -44,6 +44,7 @@ export default function Index() {
       const response = await fetch(
         `https://pokeapi.co/api/v2/pokemon?limit=${LIMIT}&offset=${page * LIMIT}`
       );
+
       const data = await response.json();
 
       const detailedPokemons: Pokemon[] = await Promise.all(
@@ -60,7 +61,16 @@ export default function Index() {
         })
       );
 
-      setPokemons(prev => [...prev, ...detailedPokemons]);
+      setPokemons(prev => {
+        const existingNames = new Set(prev.map(p => p.name));
+
+        const filtered = detailedPokemons.filter(
+          p => !existingNames.has(p.name)
+        );
+
+        return [...prev, ...filtered];
+      });
+
     } catch (e) {
       console.log(e);
     } finally {
@@ -100,24 +110,15 @@ export default function Index() {
             <View
               style={[
                 styles.card,
-                {
-                  backgroundColor:
-                    colorsByType[mainType] + "55",
-                },
+                { backgroundColor: colorsByType[mainType] + "55" },
               ]}
             >
               <Text style={styles.name}>{pokemon.name}</Text>
               <Text style={styles.type}>{mainType}</Text>
 
               <View style={styles.imagesRow}>
-                <Image
-                  source={{ uri: pokemon.image }}
-                  style={styles.image}
-                />
-                <Image
-                  source={{ uri: pokemon.imageBack }}
-                  style={styles.image}
-                />
+                <Image source={{ uri: pokemon.image }} style={styles.image} />
+                <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
               </View>
             </View>
           </Link>
@@ -139,6 +140,10 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     gap: 16,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
   },
   card: {
     padding: 20,
