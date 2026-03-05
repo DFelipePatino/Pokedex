@@ -143,7 +143,7 @@ export default function Details() {
                     </View>
 
                     <View style={styles.infoContainer}>
-                        <Text style={styles.sectionTitle}>Location Areas</Text>
+                        <Text style={styles.sectionTitle}>Where to be found</Text>
 
                         <View style={styles.infoList}>
                             {locationAreaEncounters === null ? (
