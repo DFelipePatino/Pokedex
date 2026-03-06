@@ -1,0 +1,166 @@
+import { useEffect, useState } from "react";
+import {
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
+import { Pressable, Modal } from "react-native";
+import { Stack, useLocalSearchParams } from "expo-router";
+import { colorsByType } from "../constants/colors";
+
+
+
+export default function About() {
+
+    const [imageVisible, setImageVisible] = useState(false);
+
+    const mainType = 'water';
+    const backgroundColor =
+        colorsByType[mainType] + 50;
+
+    return (
+        <>
+            <Stack.Screen
+                options={{
+                    title: 'About the creator',
+                }}
+            />
+
+            <ScrollView
+                contentContainerStyle={[
+                    styles.container,
+                    { backgroundColor: backgroundColor + "33" }, // soft tint
+                ]}
+            >
+                <View
+                    style={[
+                        styles.card,
+                        { backgroundColor },
+                    ]}
+                >
+                    <Text style={styles.name}>
+                        Daniel
+                    </Text>
+
+                    <Text style={styles.type}>
+                        Software Developer
+                    </Text>
+
+                    <View style={styles.imagesRow}>
+                        <Pressable onPress={() => setImageVisible(true)}>
+                            <Image
+                                source={require("../public/about-pic.png")}
+                                style={styles.image}
+                            />
+                        </Pressable>
+                    </View>
+
+
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.sectionTitle}>Abilities</Text>
+
+                        <View style={styles.infoList}>
+
+                            <Text
+
+                            >
+                                I'm a Full Stack Developer with expertise in JavaScript, React, Redux, WordPress, PHP, HTML, CSS, Django, Express, and AWS services. I specialize in creating modern, responsive UIs with Material UI and leveraging AWS for scalable and reliable applications. With a strong commitment to continuous learning and agile methodologies like SCRUM, I excel in both individual and team environments, delivering high-quality solutions efficiently.
+                                Let's connect and explore how I can bring value to your next project!
+                            </Text>
+
+                        </View>
+                    </View>
+
+
+
+
+                </View>
+            </ScrollView>
+            <Modal visible={imageVisible} transparent animationType="fade">
+                <Pressable
+                    style={styles.modalContainer}
+                    onPress={() => setImageVisible(false)}
+                >
+                    <Image
+                        source={require("../public/about-pic.png")}
+                        style={styles.fullImage}
+                        resizeMode="contain"
+                    />
+                </Pressable>
+            </Modal>
+        </>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        padding: 16,
+        gap: 16,
+    },
+    card: {
+        padding: 20,
+        borderRadius: 20,
+    },
+    name: {
+        fontSize: 28,
+        fontWeight: "bold",
+        textTransform: "capitalize",
+        textAlign: "center",
+    },
+    type: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "gray",
+        textTransform: "capitalize",
+        textAlign: "center",
+        padding: 16,
+    },
+    imagesRow: {
+        // flexDirection: "row",
+        // justifyContent: "space-between",
+        alignItems: "center",
+    },
+    image: {
+        width: 150,
+        height: 150,
+        borderRadius: 100,
+    },
+    infoContainer: {
+        marginTop: 24,
+        // padding: 16,
+    },
+    sectionTitle: {
+        fontSize: 22,
+        fontWeight: "bold",
+        marginBottom: 8,
+        padding: 16,
+    },
+    infoList: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
+        paddingLeft: 16,
+        textAlign: "center",
+    },
+    move: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 12,
+        backgroundColor: "rgba(255,255,255,0.6)",
+        textTransform: "capitalize",
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.9)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    fullImage: {
+        width: "100%",
+        height: "100%",
+    },
+
+});

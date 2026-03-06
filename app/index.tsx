@@ -1,4 +1,4 @@
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Image,
@@ -7,6 +7,7 @@ import {
   Text,
   View,
   ActivityIndicator,
+  Button,
 } from "react-native";
 import { colorsByType } from "../constants/colors";
 
@@ -88,50 +89,74 @@ export default function Index() {
     if (isCloseToBottom && !loading) {
       setPage(prev => prev + 1);
     }
+
+    const currentY = contentOffset.y;
+
+    if (currentY > lastScrollY && currentY > 50) {
+      // scrolling down
+      setShowButton(false);
+    } else {
+      // scrolling up
+      setShowButton(true);
+    }
+
+    setLastScrollY(currentY);
   }
 
+  const [showButton, setShowButton] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      onScroll={handleScroll}
-      scrollEventThrottle={16}
-    >
-      {pokemons.map((pokemon) => {
-        const mainType = pokemon.types[0].type.name;
-
-        return (
-          <Link
-            key={pokemon.name}
-            href={{
-              pathname: "/details",
-              params: { name: pokemon.name },
-            }}
-          >
-            <View
-              style={[
-                styles.card,
-                { backgroundColor: colorsByType[mainType] + "55" },
-              ]}
-            >
-              <Text style={styles.name}>{pokemon.name}</Text>
-              <Text style={styles.type}>{mainType}</Text>
-
-              <View style={styles.imagesRow}>
-                <Image source={{ uri: pokemon.image }} style={styles.image} />
-                <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
-              </View>
-            </View>
-          </Link>
-        );
-      })}
-
-      {loading && (
-        <ActivityIndicator
-          size="large"
-          style={{ marginVertical: 24 }}
-        />
+    <>
+      {showButton && (
+        <Button title="Pokemon Trainer" onPress={() => router.push("/about")} />
       )}
-    </ScrollView>
+
+
+      <ScrollView
+        contentContainerStyle={styles.container}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+      >
+        {pokemons.map((pokemon) => {
+          const mainType = pokemon.types[0].type.name;
+
+          return (
+            <Link
+              key={pokemon.name}
+              href={{
+                pathname: "/details",
+                params: { name: pokemon.name },
+              }}
+            >
+              <View
+                style={[
+                  styles.card,
+                  { backgroundColor: colorsByType[mainType] + "55" },
+                ]}
+              >
+                <Text style={styles.name}>{pokemon.name}</Text>
+                <Text style={styles.type}>{mainType}</Text>
+
+                <View style={styles.imagesRow}>
+                  <Image source={{ uri: pokemon.image }} style={styles.image} />
+                  <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
+                </View>
+              </View>
+            </Link>
+          );
+        })}
+
+        {loading && (
+          <ActivityIndicator
+            size="large"
+            style={{ marginVertical: 24 }}
+          />
+        )}
+      </ScrollView>
+
+    </>
   );
 }
 
