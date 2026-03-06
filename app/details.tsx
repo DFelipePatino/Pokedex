@@ -6,6 +6,7 @@ import {
     Text,
     View,
 } from "react-native";
+import { Pressable, Modal } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { colorsByType } from "../constants/colors";
 
@@ -56,6 +57,7 @@ export default function Details() {
     const params = useLocalSearchParams<{ name: string }>();
     const [pokemon, setPokemon] = useState<Pokemon | null>(null);
     const [locationAreaEncounters, setLocationAreaEncounters] = useState<PokemonLocationAreaEncounters[] | null>(null);
+    const [imageVisible, setImageVisible] = useState(false);
 
     useEffect(() => {
         if (params.name) {
@@ -135,11 +137,14 @@ export default function Details() {
                     </Text>
 
                     <View style={styles.imagesRow}>
-                        <Image
-                            source={{ uri: pokemon.sprites.other["official-artwork"].front_default ?? undefined }}
-                            style={styles.image}
-                        />
-
+                        <Pressable onPress={() => setImageVisible(true)}>
+                            <Image
+                                source={{
+                                    uri: pokemon.sprites.other["official-artwork"].front_default ?? undefined,
+                                }}
+                                style={styles.image}
+                            />
+                        </Pressable>
                     </View>
 
                     <View style={styles.infoContainer}>
@@ -195,6 +200,20 @@ export default function Details() {
 
                 </View>
             </ScrollView>
+            <Modal visible={imageVisible} transparent animationType="fade">
+                <Pressable
+                    style={styles.modalContainer}
+                    onPress={() => setImageVisible(false)}
+                >
+                    <Image
+                        source={{
+                            uri: pokemon.sprites.other["official-artwork"].front_default ?? undefined,
+                        }}
+                        style={styles.fullImage}
+                        resizeMode="contain"
+                    />
+                </Pressable>
+            </Modal>
         </>
     );
 }
@@ -249,6 +268,17 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: "rgba(255,255,255,0.6)",
         textTransform: "capitalize",
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.9)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    fullImage: {
+        width: "100%",
+        height: "100%",
     },
 
 });
