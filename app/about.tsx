@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
     Image,
+    Linking,
     ScrollView,
     StyleSheet,
     Text,
@@ -9,29 +10,33 @@ import {
 import { Pressable, Modal } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { colorsByType } from "../constants/colors";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
 export default function About() {
 
     const [imageVisible, setImageVisible] = useState(false);
+    const [isDark, setIsDark] = useState(false);
 
     const mainType = 'water';
     const backgroundColor =
         colorsByType[mainType] + 50;
 
+    useEffect(() => {
+        AsyncStorage.getItem('theme').then((value) => {
+            setIsDark(value === 'dark');
+        });
+    }, []);
+
     return (
         <>
-            <Stack.Screen
-                options={{
-                    title: 'About the creator',
-                }}
-            />
+            <Stack.Screen />
 
             <ScrollView
                 contentContainerStyle={[
                     styles.container,
-                    { backgroundColor: backgroundColor + "33" }, // soft tint
+                    { backgroundColor: isDark ? "#232323ff" : backgroundColor + "33" }, // soft tint
                 ]}
             >
                 <View
@@ -55,6 +60,22 @@ export default function About() {
                                 style={styles.image}
                             />
                         </Pressable>
+                    </View>
+
+                    <View style={styles.infoContainer}>
+                        <Text style={styles.sectionTitle}>Where to be found</Text>
+
+                        <View style={styles.infoList}>
+                            <Pressable onPress={() => Linking.openURL('https://www.linkedin.com/in/daniel-patino-207156208/')}>
+                                <Text style={styles.move}>LinkedIn</Text>
+                            </Pressable>
+                            <Pressable onPress={() => Linking.openURL('https://github.com/DFelipePatino')}>
+                                <Text style={styles.move}>GitHub</Text>
+                            </Pressable>
+                            <Pressable onPress={() => Linking.openURL('https://danielpatinoportfolio.onrender.com/')}>
+                                <Text style={styles.move}>Portfolio</Text>
+                            </Pressable>
+                        </View>
                     </View>
 
 
@@ -150,6 +171,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: "rgba(255,255,255,0.6)",
         textTransform: "capitalize",
+        textAlign: "center",
     },
     modalContainer: {
         flex: 1,

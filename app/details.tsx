@@ -9,6 +9,7 @@ import {
 import { Pressable, Modal } from "react-native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { colorsByType } from "../constants/colors";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface PokemonType {
     type: {
@@ -58,6 +59,7 @@ export default function Details() {
     const [pokemon, setPokemon] = useState<Pokemon | null>(null);
     const [locationAreaEncounters, setLocationAreaEncounters] = useState<PokemonLocationAreaEncounters[] | null>(null);
     const [imageVisible, setImageVisible] = useState(false);
+    const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
         if (params.name) {
@@ -84,6 +86,12 @@ export default function Details() {
         }
     }
 
+    useEffect(() => {
+        AsyncStorage.getItem('theme').then((value) => {
+            setIsDark(value === 'dark');
+        });
+    }, []);
+
     // console.log(pokemon?.id, 'pokemon id');
 
     async function fetchLocationAreaEncounters(id: number) {
@@ -109,15 +117,15 @@ export default function Details() {
     return (
         <>
             <Stack.Screen
-                options={{
-                    title: pokemon.name,
-                }}
+            // options={{
+            //     title: pokemon.name,
+            // }}
             />
 
             <ScrollView
                 contentContainerStyle={[
                     styles.container,
-                    { backgroundColor: backgroundColor + "33" }, // soft tint
+                    { backgroundColor: isDark ? "#232323ff" : backgroundColor + "33" }, // soft tint
                 ]}
             >
                 <View

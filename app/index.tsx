@@ -8,8 +8,10 @@ import {
   View,
   ActivityIndicator,
   Button,
+  Pressable,
 } from "react-native";
 import { colorsByType } from "../constants/colors";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface PokemonType {
   type: {
@@ -31,6 +33,7 @@ export default function Index() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     fetchPokemons();
@@ -103,19 +106,28 @@ export default function Index() {
     setLastScrollY(currentY);
   }
 
-  const [showButton, setShowButton] = useState(false);
+  const [showButton, setShowButton] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    AsyncStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
 
 
   return (
     <>
       {showButton && (
-        <Button title="Pokemon Trainer" onPress={() => router.push("/about")} />
+        <View style={isDark ? styles.buttonsContainerDark : styles.buttonsContainer}>
+          <Button color={isDark ? "white" : "black"} title="Pokemon Master" onPress={() => router.push("/about")} />
+          <Button color={isDark ? "white" : "black"} title={isDark ? "Light Mode" : "Dark Mode"} onPress={() => setIsDark(!isDark)} />
+        </View>
       )}
 
 
+
+
       <ScrollView
-        contentContainerStyle={styles.container}
+        contentContainerStyle={!isDark ? styles.container : styles.containerDark}
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
@@ -169,6 +181,50 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
+  },
+  containerDark: {
+    padding: 16,
+    gap: 16,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#232323ff",
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    gap: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonsContainerDark: {
+    backgroundColor: "#232323ff",
+    flexDirection: 'row',
+    gap: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hiddenButtons: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    flexDirection: 'row',
+    gap: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hiddenButtonsDark: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    flexDirection: 'row',
+    gap: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: "white",
+    backgroundColor: "#232323ff",
+    borderRadius: 20,
+    padding: 10,
   },
   card: {
     padding: 20,
