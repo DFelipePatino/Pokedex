@@ -118,8 +118,25 @@ export default function Index() {
     <>
       {showButton && (
         <View style={isDark ? styles.buttonsContainerDark : styles.buttonsContainer}>
-          <Button color={isDark ? "white" : "black"} title="Pokemon Master" onPress={() => router.push("/about")} />
-          <Button color={isDark ? "white" : "black"} title={isDark ? "Light Mode" : "Dark Mode"} onPress={() => setIsDark(!isDark)} />
+
+          <Pressable
+            style={isDark ? styles.buttonDark : styles.buttonLight}
+            onPress={() => router.push("/about")}
+          >
+            <Text style={isDark ? styles.textDark : styles.textLight}>
+              Pokemon Master
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={isDark ? styles.buttonDark : styles.buttonLight}
+            onPress={() => setIsDark(!isDark)}
+          >
+            <Text style={isDark ? styles.textDark : styles.textLight}>
+              {isDark ? "Light Mode" : "Dark Mode"}
+            </Text>
+          </Pressable>
+
         </View>
       )}
 
@@ -193,38 +210,39 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: 'row',
-    gap: 80,
+    gap: 120,
     alignItems: 'center',
     justifyContent: 'center',
   },
   buttonsContainerDark: {
     backgroundColor: "#232323ff",
     flexDirection: 'row',
-    gap: 80,
+    gap: 120,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  hiddenButtons: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    flexDirection: 'row',
-    gap: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
+  buttonLight: {
+    backgroundColor: "#eee",
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 5
   },
-  hiddenButtonsDark: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    flexDirection: 'row',
-    gap: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
+
+  buttonDark: {
+    backgroundColor: "#333",
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 5
+  },
+
+  textLight: {
+    color: "black",
+    textAlign: "center"
+  },
+
+  textDark: {
     color: "white",
-    backgroundColor: "#232323ff",
-    borderRadius: 20,
-    padding: 10,
+    textAlign: "center"
   },
   card: {
     padding: 20,
