@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { colorsByType } from "../constants/colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Landing from "./landing";
 
 interface PokemonType {
   type: {
@@ -34,6 +35,7 @@ export default function Index() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isDark, setIsDark] = useState(true);
+  const [showLanding, setShowLanding] = useState(true);
 
   useEffect(() => {
     fetchPokemons();
@@ -113,10 +115,18 @@ export default function Index() {
     AsyncStorage.setItem('theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLanding(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
 
   return (
     <>
-      {showButton && (
+      {showButton && !showLanding && (
         <View style={isDark ? styles.buttonsContainerDark : styles.buttonsContainer}>
 
           <Pressable
@@ -141,49 +151,55 @@ export default function Index() {
       )}
 
 
+      {showLanding ? (
+        <>
+          <Landing />
+        </>
+      ) : null}
 
+      {!showLanding ? (
+        <ScrollView
+          contentContainerStyle={!isDark ? styles.container : styles.containerDark}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        >
+          {pokemons.map((pokemon) => {
+            const mainType = pokemon.types[0].type.name;
 
-      <ScrollView
-        contentContainerStyle={!isDark ? styles.container : styles.containerDark}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-      >
-        {pokemons.map((pokemon) => {
-          const mainType = pokemon.types[0].type.name;
-
-          return (
-            <Link
-              key={pokemon.name}
-              href={{
-                pathname: "/details",
-                params: { name: pokemon.name },
-              }}
-            >
-              <View
-                style={[
-                  styles.card,
-                  { backgroundColor: colorsByType[mainType] + "55" },
-                ]}
+            return (
+              <Link
+                key={pokemon.name}
+                href={{
+                  pathname: "/details",
+                  params: { name: pokemon.name },
+                }}
               >
-                <Text style={styles.name}>{pokemon.name}</Text>
-                <Text style={styles.type}>{mainType}</Text>
+                <View
+                  style={[
+                    styles.card,
+                    { backgroundColor: colorsByType[mainType] + "55" },
+                  ]}
+                >
+                  <Text style={styles.name}>{pokemon.name}</Text>
+                  <Text style={styles.type}>{mainType}</Text>
 
-                <View style={styles.imagesRow}>
-                  <Image source={{ uri: pokemon.image }} style={styles.image} />
-                  <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
+                  <View style={styles.imagesRow}>
+                    <Image source={{ uri: pokemon.image }} style={styles.image} />
+                    <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
+                  </View>
                 </View>
-              </View>
-            </Link>
-          );
-        })}
+              </Link>
+            );
+          })}
 
-        {loading && (
-          <ActivityIndicator
-            size="large"
-            style={{ marginVertical: 24 }}
-          />
-        )}
-      </ScrollView>
+          {loading && (
+            <ActivityIndicator
+              size="large"
+              style={{ marginVertical: 24 }}
+            />
+          )}
+        </ScrollView>
+      ) : null}
 
     </>
   );

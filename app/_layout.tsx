@@ -1,5 +1,5 @@
 import { Button } from "@react-navigation/elements";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect } from "react";
 
@@ -16,8 +16,18 @@ export default function RootLayout() {
   //   });
   // }, [isDark]);
 
+
+
+
+
+
   return (
-    <Stack>
+    <Stack initialRouteName="landing">
+      <Stack.Screen
+        name="landing"
+        options={{ title: "Landing" }}
+      />
+
       <Stack.Screen
         name="index"
         options={{
@@ -34,7 +44,7 @@ export default function RootLayout() {
           title: "About",
           headerBackButtonDisplayMode: "minimal",
           presentation: "formSheet",
-          sheetAllowedDetents: [0.80],
+          sheetAllowedDetents: [0.5, 0.90],
           sheetGrabberVisible: true,
           headerShown: false,
         }}
