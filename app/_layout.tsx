@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 
 export default function RootLayout() {
 
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   // console.log(isDark);
 
   // useEffect(() => {
@@ -34,6 +34,9 @@ export default function RootLayout() {
           title: "All Pokemons",
           headerStyle: {
             backgroundColor: isDark ? "#232323ff" : "#fff",
+          },
+          headerTitleStyle: {
+            color: "#fff",
           },
         }}
       />

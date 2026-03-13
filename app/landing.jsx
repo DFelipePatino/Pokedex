@@ -39,7 +39,7 @@ export default function Landing() {
 
                 >
                     <Text style={styles.name}>
-                        Welcom to the Pokedex
+                        Welcom to the Pokedex App
                     </Text>
 
 
