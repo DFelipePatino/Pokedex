@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+    Animated,
     ScrollView,
     StyleSheet,
     Text,
@@ -21,32 +22,44 @@ export default function Landing() {
     //     return () => clearTimeout(timer);
     // }, []);
 
+    const scale = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(scale, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    }, []);
+
+
 
     return (
         <>
-            <Stack.Screen />
+            <Animated.View style={{ flexGrow: 1, transform: [{ scale }] }}>
 
-            <ScrollView
-                contentContainerStyle={[
-                    styles.container,
-                    {
-                        flexGrow: 1,
-                        backgroundColor: isDark ? "#232323ff" : backgroundColor + "33",
-                    },
-                ]}
-            >
-                <View
-
+                <ScrollView
+                    contentContainerStyle={[
+                        styles.container,
+                        {
+                            flexGrow: 1,
+                            backgroundColor: isDark ? "#232323ff" : backgroundColor + "33",
+                        },
+                    ]}
                 >
-                    <Text style={styles.name}>
-                        Welcom to the Pokedex App
-                    </Text>
+                    <View
+
+                    >
+                        <Text style={styles.name}>
+                            Welcom to the Pokedex App
+                        </Text>
 
 
-                </View>
+                    </View>
 
-            </ScrollView>
+                </ScrollView>
 
+            </Animated.View>
         </>
     );
 }
