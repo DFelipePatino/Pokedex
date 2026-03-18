@@ -16,6 +16,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function About() {
 
+    const author = {
+        name: "Daniel Felipe Patino",
+        role: "Software Developer",
+        image: require("../public/about-pic.png"),
+        linkedin: "https://www.linkedin.com/in/daniel-patino-207156208/",
+        github: "https://github.com/DFelipePatino",
+        portfolio: "https://danielpatinoportfolio.onrender.com/",
+        description: "I'm a Full Stack Developer with expertise in JavaScript, React, Redux, WordPress, PHP, HTML, CSS, Django, Express, and AWS services. I specialize in creating modern, responsive UIs with Material UI and leveraging AWS for scalable and reliable applications. With a strong commitment to continuous learning and agile methodologies like SCRUM, I excel in both individual and team environments, delivering high-quality solutions efficiently. Let's connect and explore how I can bring value to your next project!",
+    }
+
     const [imageVisible, setImageVisible] = useState(false);
     const [isDark, setIsDark] = useState(false);
 
@@ -46,17 +56,17 @@ export default function About() {
                     ]}
                 >
                     <Text style={styles.name}>
-                        Daniel
+                        {author.name}
                     </Text>
 
                     <Text style={styles.type}>
-                        Software Developer
+                        {author.role}
                     </Text>
 
                     <View style={styles.imagesRow}>
                         <Pressable onPress={() => setImageVisible(true)}>
                             <Image
-                                source={require("../public/about-pic.png")}
+                                source={author.image}
                                 style={styles.image}
                             />
                         </Pressable>
@@ -66,13 +76,13 @@ export default function About() {
                         <Text style={styles.sectionTitle}>Where to be found</Text>
 
                         <View style={styles.infoList}>
-                            <Pressable onPress={() => Linking.openURL('https://www.linkedin.com/in/daniel-patino-207156208/')}>
+                            <Pressable onPress={() => Linking.openURL(author.linkedin)}>
                                 <Text style={styles.move}>LinkedIn</Text>
                             </Pressable>
-                            <Pressable onPress={() => Linking.openURL('https://github.com/DFelipePatino')}>
+                            <Pressable onPress={() => Linking.openURL(author.github)}>
                                 <Text style={styles.move}>GitHub</Text>
                             </Pressable>
-                            <Pressable onPress={() => Linking.openURL('https://danielpatinoportfolio.onrender.com/')}>
+                            <Pressable onPress={() => Linking.openURL(author.portfolio)}>
                                 <Text style={styles.move}>Portfolio</Text>
                             </Pressable>
                         </View>
@@ -87,8 +97,7 @@ export default function About() {
                             <Text
 
                             >
-                                I'm a Full Stack Developer with expertise in JavaScript, React, Redux, WordPress, PHP, HTML, CSS, Django, Express, and AWS services. I specialize in creating modern, responsive UIs with Material UI and leveraging AWS for scalable and reliable applications. With a strong commitment to continuous learning and agile methodologies like SCRUM, I excel in both individual and team environments, delivering high-quality solutions efficiently.
-                                Let's connect and explore how I can bring value to your next project!
+                                {author.description}
                             </Text>
 
                         </View>
@@ -105,7 +114,7 @@ export default function About() {
                     onPress={() => setImageVisible(false)}
                 >
                     <Image
-                        source={require("../public/about-pic.png")}
+                        source={author.image}
                         style={styles.fullImage}
                         resizeMode="contain"
                     />
