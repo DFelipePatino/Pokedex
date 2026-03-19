@@ -81,7 +81,7 @@ export default function YourPokemon() {
 
         // Ensure we actually have content for the AI to generate from
         if (name && type && locationsStr.length > 0 && abilitiesStr.length > 0 && movesStr.length > 0) {
-            setPrompt(`${name} is a ${type} pokemon that is found in ${locationsStr} and has the abilities ${abilitiesStr} and moves ${movesStr} in the style of pokemon official artwork`);
+            setPrompt(`${name} is a ${type} pokemon that has the abilities ${abilitiesStr} and moves ${movesStr} in the style of pokemon official artwork`);
         }
     }, [newPokemon]);
 
@@ -113,11 +113,10 @@ export default function YourPokemon() {
         });
 
         if (response.success) {
-            setShowSuccess(true); // Trigger your stylish modal
+            setShowSuccess(true);
         } else if (response.duplicate) {
             Alert.alert("Already Saved", "This exact Pokémon is already in your Pokédex!");
         } else {
-            // You might still want a basic alert for errors, or create an Error Modal
             Alert.alert("Error", "Could not save to Pokédex.");
         }
     };
@@ -381,7 +380,6 @@ export default function YourPokemon() {
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
-                        {/* You can use a local Image here for the Pokéball */}
                         <Image
                             source={{ uri: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png' }}
                             style={styles.pokeBallIcon}
@@ -395,8 +393,8 @@ export default function YourPokemon() {
                         <TouchableOpacity
                             style={styles.closeButton}
                             onPress={() => {
-                                setShowSuccess(false); // Close the modal
-                                router.push("/savedPokemon"); // Navigate to the Pokédex
+                                setShowSuccess(false);
+                                router.push("/savedPokemon");
                             }}
                         >
                             <Text style={styles.closeButtonText}>My Pokédex</Text>
