@@ -79,7 +79,7 @@ export default function Details() {
                 `https://pokeapi.co/api/v2/pokemon/${name}`
             );
             const data = await response.json();
-            console.log(data, 'pokemon');
+            // console.log(data, 'pokemon');
             setPokemon(data);
         } catch (error) {
             console.log(error);

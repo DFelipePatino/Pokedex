@@ -129,7 +129,7 @@ export default function YourPokemon() {
         locations: []
     });
 
-    console.log(newPokemon, 'new pokemon');
+    // console.log(newPokemon, 'new pokemon');
 
     useEffect(() => {
         const fetchPokemonData = async () => {
