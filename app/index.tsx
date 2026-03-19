@@ -37,7 +37,6 @@ export default function Index() {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isDark, setIsDark] = useState(false);
-  const [isHighligted, setIsHighligted] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
   const [showMain, setShowMain] = useState(false);
 
@@ -119,26 +118,7 @@ export default function Index() {
     AsyncStorage.setItem('theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowLanding(false);
-      setShowMain(true);
-    }, 1000);
 
-    setTimeout(() => {
-      opacityTransition();
-    }, 2800);
-
-    setTimeout(() => {
-      setIsHighligted(true);
-    }, 3200);
-
-    setTimeout(() => {
-      setIsHighligted(false);
-    }, 4000);
-
-    return () => clearTimeout(timer);
-  }, []);
 
   const scales = [
     useRef(new Animated.Value(0)).current,
@@ -164,40 +144,79 @@ export default function Index() {
   }, [showMain]);
 
 
+
+  const opacitys = [
+    useRef(new Animated.Value(1)).current,
+    useRef(new Animated.Value(1)).current,
+    useRef(new Animated.Value(1)).current,
+    useRef(new Animated.Value(1)).current,
+    useRef(new Animated.Value(1)).current,
+  ]
+
+  const opacityTransition = (index: number) => {
+    const currentOpacity = opacitys[index];
+    if (index === 0) {
+      Animated.sequence([
+        Animated.timing(currentOpacity, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(currentOpacity, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+      setTimeout(() => setIsDark(!isDark), 150);
+    } else if (index === 4) {
+      Animated.sequence([
+        Animated.timing(currentOpacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(currentOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLanding(false);
+      setShowMain(true);
+    }, 1000);
+
+    const t1 = setTimeout(() => {
+      opacityTransition(0);
+    }, 2800);
+
+    const t2 = setTimeout(() => {
+      opacityTransition(4);
+    }, 3600);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
+
   const getButtonStyle = () => {
-    if (isDark && !isHighligted) return styles.buttonSlateSubtleDark;
-    if (!isDark && !isHighligted) return styles.buttonSlateInfo;
-    // if (!isHighligted) return styles.buttonSlateSubtleDark;
-    if (isHighligted && isDark) return styles.buttonSlateSubtleDarkHighligted;
-    if (isHighligted && !isDark) return styles.buttonBrownDeepDark;
-
+    if (isDark) return styles.buttonSlateSubtleDark;
+    if (!isDark) return styles.buttonSlateInfo;
   };
-
-  const opacityTransition = () => {
-    Animated.sequence([
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    setIsDark(!isDark);
-  };
-
-  const opacity = useRef(new Animated.Value(1)).current;
 
   const buttons = [
     { label: "Pokemon Master", action: () => router.push("/about"), style: isDark ? styles.buttonTealActionDark : styles.buttonTealAction },
     { label: "Create Your Pokemon", action: () => router.push("/yourPokemon"), style: isDark ? styles.buttonBrownDeepDark : styles.buttonBrownSubtle },
     { label: "My Pokédex", action: () => router.push("/savedPokemon"), style: isDark ? styles.buttonSlateSubtleDark2 : styles.buttonSlateInfo2 },
     {
-      label: isDark ? "Light Mode" : "Dark Mode", action: () => { opacityTransition() }
+      label: isDark ? "Light Mode" : "Dark Mode", action: () => { opacityTransition(0) }
       , style: getButtonStyle(),
 
 
@@ -209,86 +228,78 @@ export default function Index() {
 
     <>
 
-      {showButton && !showLanding && (
+      {!showLanding && (
+        <Animated.View style={{ flex: 1, opacity: opacitys[0] }}>
+          {showButton && (
+            <View style={isDark ? styles.buttonsContainerDark : styles.buttonsContainer}>
+              {buttons.map((btn, index) => (
+                <Animated.View
+                  key={index}
+                  style={{ opacity: opacitys[index + 1], flexGrow: 1, transform: [{ scale: scales[index + 1] }] }}
+                >
+                  <Pressable
+                    style={btn.style}
+                    onPress={btn.action}
+                  >
+                    <Text style={isDark ? styles.textDark : styles.textLight}>
+                      {btn.label}
+                    </Text>
+                  </Pressable>
+                </Animated.View>
+              ))}
+            </View>
+          )}
 
-        <View style={isDark ? styles.buttonsContainerDark : styles.buttonsContainer}>
+          <ScrollView key={1}
+            contentContainerStyle={!isDark ? styles.container : styles.containerDark}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+          >
+            {pokemons.map((pokemon) => {
+              const mainType = pokemon.types[0].type.name;
 
+              return (
+                <Animated.View key={pokemon.name} style={{ flexGrow: 1, transform: [{ scale: scales[0] }] }}>
+                  <Link
+                    href={{
+                      pathname: "/details",
+                      params: { name: pokemon.name },
+                    }}
+                  >
+                    <View
+                      style={[
+                        styles.card,
+                        { backgroundColor: colorsByType[mainType] + "55" },
+                      ]}
+                    >
+                      <Text style={styles.name}>{pokemon.name}</Text>
+                      <Text style={styles.type}>{mainType}</Text>
 
+                      <View style={styles.imagesRow}>
+                        <Image source={{ uri: pokemon.image }} style={styles.image} />
+                        <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
+                      </View>
+                    </View>
+                  </Link>
+                </Animated.View>
+              );
+            })}
 
-          {buttons.map((btn, index) => (
-            <Animated.View
-              key={index}
-              style={{ opacity: opacity, flexGrow: 1, transform: [{ scale: scales[index + 1] }] }}
-            >
-              <Pressable
-                style={btn.style}
-                onPress={btn.action}
-              >
-                <Text style={isDark ? styles.textDark : styles.textLight}>
-                  {btn.label}
-                </Text>
-              </Pressable>
-            </Animated.View>
-          ))}
-        </View>
-
+            {loading && (
+              <ActivityIndicator
+                size="large"
+                style={{ marginVertical: 24 }}
+              />
+            )}
+          </ScrollView>
+        </Animated.View>
       )}
-
 
       {showLanding ? (
         <>
           <Landing />
         </>
       ) : null}
-
-      {!showLanding ? (
-
-        <ScrollView key={1}
-          contentContainerStyle={!isDark ? styles.container : styles.containerDark}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-        >
-          {pokemons.map((pokemon) => {
-            const mainType = pokemon.types[0].type.name;
-
-            return (
-              <Animated.View key={pokemon.name} style={{ opacity: opacity, flexGrow: 1, transform: [{ scale: scales[0] }] }}>
-                <Link
-                  href={{
-                    pathname: "/details",
-                    params: { name: pokemon.name },
-                  }}
-                >
-                  <View
-                    style={[
-                      styles.card,
-                      { backgroundColor: colorsByType[mainType] + "55" },
-                    ]}
-                  >
-                    <Text style={styles.name}>{pokemon.name}</Text>
-                    <Text style={styles.type}>{mainType}</Text>
-
-                    <View style={styles.imagesRow}>
-                      <Image source={{ uri: pokemon.image }} style={styles.image} />
-                      <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
-                    </View>
-                  </View>
-                </Link>
-              </Animated.View>
-            );
-          })}
-
-          {loading && (
-            <ActivityIndicator
-              size="large"
-              style={{ marginVertical: 24 }}
-            />
-          )}
-        </ScrollView>
-
-      ) : null}
-
-
 
     </>
   );
@@ -368,36 +379,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonBrownDeepDark: {
-    backgroundColor: "#2B211A", // Dark, rich brown base
+    backgroundColor: "#2B211A",
     padding: 12,
     borderRadius: 8,
     marginVertical: 5,
-    // color: "#E0C8C1" // Much lighter, warmer brown for text
+
   },
-  buttonSlateSubtleDarkHighligted: {
-    backgroundColor: "#333", // Dark grey background
-    padding: 10,
+
+  buttonSlateSubtleDark: {
+    backgroundColor: "#333",
+    padding: 12,
     borderRadius: 8,
     marginVertical: 5,
     opacity: 0.7,
-    borderWidth: 2,
-    borderColor: "#87A0BC",
-  },
-  buttonSlateSubtleDark: {
-    backgroundColor: "#333", // Dark grey background
-    padding: 12,
-    borderRadius: 8,
-    marginVertical: 5,
-    opacity: 0.7, // Muted presence
-    // color: "#87A0BC" // Lighter slate blue for text
   },
   buttonSlateSubtleDark2: {
-    backgroundColor: "#f955865a", // Dark grey background
+    backgroundColor: "#f955865a",
     padding: 12,
     borderRadius: 8,
     marginVertical: 5,
-    opacity: 0.7, // Muted presence
-    // color: "#87A0BC" // Lighter slate blue for text
+    opacity: 0.7,
   },
 
   textLight: {
