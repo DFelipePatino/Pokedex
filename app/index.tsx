@@ -1,5 +1,5 @@
 import { Link, router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Image,
   ScrollView,
@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   Button,
   Pressable,
+  Animated,
+  Easing,
 } from "react-native";
 import { colorsByType } from "../constants/colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -36,6 +38,7 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
   const [isDark, setIsDark] = useState(true);
   const [showLanding, setShowLanding] = useState(true);
+  const [showMain, setShowMain] = useState(false);
 
   useEffect(() => {
     fetchPokemons();
@@ -118,54 +121,71 @@ export default function Index() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowLanding(false);
-    }, 2000);
+      setShowMain(true);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
 
+  const scales = [
+    useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(0)).current,
+  ];
+
+  useEffect(() => {
+    if (showMain) {
+      Animated.stagger(
+        200,
+        scales.map(scale =>
+          Animated.timing(scale, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          })
+        )
+      ).start();
+    }
+  }, [showMain]);
+
+
+  const buttons = [
+    { label: "Pokemon Master", action: () => router.push("/about"), style: isDark ? styles.buttonTealActionDark : styles.buttonTealAction },
+    { label: "Create Your Pokemon", action: () => router.push("/yourPokemon"), style: isDark ? styles.buttonBrownDeepDark : styles.buttonBrownSubtle },
+    { label: "My Pokédex", action: () => router.push("/savedPokemon"), style: isDark ? styles.buttonSlateSubtleDark2 : styles.buttonSlateInfo2 },
+    { label: isDark ? "Light Mode" : "Dark Mode", action: () => setIsDark(!isDark), style: isDark ? styles.buttonSlateSubtleDark : styles.buttonSlateInfo },
+  ];
+
 
   return (
+
     <>
+
       {showButton && !showLanding && (
+
         <View style={isDark ? styles.buttonsContainerDark : styles.buttonsContainer}>
 
-          <Pressable
-            style={isDark ? styles.buttonTealActionDark : styles.buttonTealAction}
-            onPress={() => router.push("/about")}
-          >
-            <Text style={isDark ? styles.textDark : styles.textLight}>
-              Pokemon Master
-            </Text>
-          </Pressable>
 
-          <Pressable
-            style={isDark ? styles.buttonBrownDeepDark : styles.buttonBrownSubtle}
-            onPress={() => router.push("/yourPokemon")}
-          >
-            <Text style={isDark ? styles.textDark : styles.textLight}>
-              Create Your Pokemon
-            </Text>
-          </Pressable>
 
-          <Pressable
-            style={isDark ? styles.buttonSlateSubtleDark2 : styles.buttonSlateInfo2}
-            onPress={() => router.push("/savedPokemon")}
-          >
-            <Text style={isDark ? styles.textDark : styles.textLight}>
-              My Pokédex
-            </Text>
-          </Pressable>
-
-          <Pressable
-            style={isDark ? styles.buttonSlateSubtleDark : styles.buttonSlateInfo}
-            onPress={() => setIsDark(!isDark)}
-          >
-            <Text style={isDark ? styles.textDark : styles.textLight}>
-              {isDark ? "Light Mode" : "Dark Mode"}
-            </Text>
-          </Pressable>
-
+          {buttons.map((btn, index) => (
+            <Animated.View
+              key={index}
+              style={{ flexGrow: 1, transform: [{ scale: scales[index + 1] }] }}
+            >
+              <Pressable
+                style={btn.style}
+                onPress={btn.action}
+              >
+                <Text style={isDark ? styles.textDark : styles.textLight}>
+                  {btn.label}
+                </Text>
+              </Pressable>
+            </Animated.View>
+          ))}
         </View>
+
       )}
 
 
@@ -176,7 +196,8 @@ export default function Index() {
       ) : null}
 
       {!showLanding ? (
-        <ScrollView
+
+        <ScrollView key={1}
           contentContainerStyle={!isDark ? styles.container : styles.containerDark}
           onScroll={handleScroll}
           scrollEventThrottle={16}
@@ -185,28 +206,29 @@ export default function Index() {
             const mainType = pokemon.types[0].type.name;
 
             return (
-              <Link
-                key={pokemon.name}
-                href={{
-                  pathname: "/details",
-                  params: { name: pokemon.name },
-                }}
-              >
-                <View
-                  style={[
-                    styles.card,
-                    { backgroundColor: colorsByType[mainType] + "55" },
-                  ]}
+              <Animated.View key={pokemon.name} style={{ flexGrow: 1, transform: [{ scale: scales[0] }] }}>
+                <Link
+                  href={{
+                    pathname: "/details",
+                    params: { name: pokemon.name },
+                  }}
                 >
-                  <Text style={styles.name}>{pokemon.name}</Text>
-                  <Text style={styles.type}>{mainType}</Text>
+                  <View
+                    style={[
+                      styles.card,
+                      { backgroundColor: colorsByType[mainType] + "55" },
+                    ]}
+                  >
+                    <Text style={styles.name}>{pokemon.name}</Text>
+                    <Text style={styles.type}>{mainType}</Text>
 
-                  <View style={styles.imagesRow}>
-                    <Image source={{ uri: pokemon.image }} style={styles.image} />
-                    <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
+                    <View style={styles.imagesRow}>
+                      <Image source={{ uri: pokemon.image }} style={styles.image} />
+                      <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
+                    </View>
                   </View>
-                </View>
-              </Link>
+                </Link>
+              </Animated.View>
             );
           })}
 
@@ -217,7 +239,10 @@ export default function Index() {
             />
           )}
         </ScrollView>
+
       ) : null}
+
+
 
     </>
   );

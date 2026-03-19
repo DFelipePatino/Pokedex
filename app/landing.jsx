@@ -71,6 +71,12 @@ const styles = StyleSheet.create({
         gap: 16,
         alignItems: "center",
         justifyContent: "center",
+        backgroundImage: "url(wallpaper.jpg)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
+        backgroundBlendMode: "overlay",
     },
     name: {
         fontSize: 28,
