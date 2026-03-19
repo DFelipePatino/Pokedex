@@ -130,7 +130,7 @@ export default function Index() {
         <View style={isDark ? styles.buttonsContainerDark : styles.buttonsContainer}>
 
           <Pressable
-            style={isDark ? styles.buttonDark : styles.buttonLight}
+            style={isDark ? styles.buttonTealActionDark : styles.buttonTealAction}
             onPress={() => router.push("/about")}
           >
             <Text style={isDark ? styles.textDark : styles.textLight}>
@@ -139,7 +139,25 @@ export default function Index() {
           </Pressable>
 
           <Pressable
-            style={isDark ? styles.buttonDark : styles.buttonLight}
+            style={isDark ? styles.buttonBrownDeepDark : styles.buttonBrownSubtle}
+            onPress={() => router.push("/yourPokemon")}
+          >
+            <Text style={isDark ? styles.textDark : styles.textLight}>
+              Create Your Pokemon
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={isDark ? styles.buttonTealActionDark : styles.buttonTealAction}
+            onPress={() => router.push("/savedPokemon")}
+          >
+            <Text style={isDark ? styles.textDark : styles.textLight}>
+              My Pokédex
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={isDark ? styles.buttonSlateSubtleDark : styles.buttonSlateInfo}
             onPress={() => setIsDark(!isDark)}
           >
             <Text style={isDark ? styles.textDark : styles.textLight}>
@@ -226,29 +244,65 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: 'row',
-    gap: 120,
+    flexWrap: 'wrap',
+    gap: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   buttonsContainerDark: {
     backgroundColor: "#232323ff",
     flexDirection: 'row',
-    gap: 120,
+    flexWrap: 'wrap',
+    gap: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonLight: {
-    backgroundColor: "#eee",
+
+  buttonTealAction: {
+    backgroundColor: "#A98FF3",
     padding: 12,
     borderRadius: 8,
-    marginVertical: 5
+    marginVertical: 5,
+    // borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonBrownSubtle: {
+    backgroundColor: "#F7D02C",
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 5,
+  },
+  buttonSlateInfo: {
+    backgroundColor: "#705746",
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 5,
+    opacity: 0.8,
   },
 
-  buttonDark: {
-    backgroundColor: "#333",
+  buttonTealActionDark: {
+    backgroundColor: "#1e4343ff",
     padding: 12,
     borderRadius: 8,
-    marginVertical: 5
+    marginVertical: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonBrownDeepDark: {
+    backgroundColor: "#2B211A", // Dark, rich brown base
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 5,
+    // color: "#E0C8C1" // Much lighter, warmer brown for text
+  },
+  buttonSlateSubtleDark: {
+    backgroundColor: "#333", // Dark grey background
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 5,
+    opacity: 0.7, // Muted presence
+    // color: "#87A0BC" // Lighter slate blue for text
   },
 
   textLight: {
