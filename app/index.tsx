@@ -36,7 +36,8 @@ export default function Index() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
+  const [isHighligted, setIsHighligted] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
   const [showMain, setShowMain] = useState(false);
 
@@ -124,6 +125,18 @@ export default function Index() {
       setShowMain(true);
     }, 1000);
 
+    setTimeout(() => {
+      opacityTransition();
+    }, 2800);
+
+    setTimeout(() => {
+      setIsHighligted(true);
+    }, 3200);
+
+    setTimeout(() => {
+      setIsHighligted(false);
+    }, 4000);
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -151,11 +164,44 @@ export default function Index() {
   }, [showMain]);
 
 
+  const getButtonStyle = () => {
+    if (isDark && !isHighligted) return styles.buttonSlateSubtleDark;
+    if (!isDark && !isHighligted) return styles.buttonSlateInfo;
+    // if (!isHighligted) return styles.buttonSlateSubtleDark;
+    if (isHighligted && isDark) return styles.buttonSlateSubtleDarkHighligted;
+    if (isHighligted && !isDark) return styles.buttonBrownDeepDark;
+
+  };
+
+  const opacityTransition = () => {
+    Animated.sequence([
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    setIsDark(!isDark);
+  };
+
+  const opacity = useRef(new Animated.Value(1)).current;
+
   const buttons = [
     { label: "Pokemon Master", action: () => router.push("/about"), style: isDark ? styles.buttonTealActionDark : styles.buttonTealAction },
     { label: "Create Your Pokemon", action: () => router.push("/yourPokemon"), style: isDark ? styles.buttonBrownDeepDark : styles.buttonBrownSubtle },
     { label: "My Pokédex", action: () => router.push("/savedPokemon"), style: isDark ? styles.buttonSlateSubtleDark2 : styles.buttonSlateInfo2 },
-    { label: isDark ? "Light Mode" : "Dark Mode", action: () => setIsDark(!isDark), style: isDark ? styles.buttonSlateSubtleDark : styles.buttonSlateInfo },
+    {
+      label: isDark ? "Light Mode" : "Dark Mode", action: () => { opacityTransition() }
+      , style: getButtonStyle(),
+
+
+    },
   ];
 
 
@@ -172,7 +218,7 @@ export default function Index() {
           {buttons.map((btn, index) => (
             <Animated.View
               key={index}
-              style={{ flexGrow: 1, transform: [{ scale: scales[index + 1] }] }}
+              style={{ opacity: opacity, flexGrow: 1, transform: [{ scale: scales[index + 1] }] }}
             >
               <Pressable
                 style={btn.style}
@@ -206,7 +252,7 @@ export default function Index() {
             const mainType = pokemon.types[0].type.name;
 
             return (
-              <Animated.View key={pokemon.name} style={{ flexGrow: 1, transform: [{ scale: scales[0] }] }}>
+              <Animated.View key={pokemon.name} style={{ opacity: opacity, flexGrow: 1, transform: [{ scale: scales[0] }] }}>
                 <Link
                   href={{
                     pathname: "/details",
@@ -327,6 +373,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 5,
     // color: "#E0C8C1" // Much lighter, warmer brown for text
+  },
+  buttonSlateSubtleDarkHighligted: {
+    backgroundColor: "#333", // Dark grey background
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 5,
+    opacity: 0.7,
+    borderWidth: 2,
+    borderColor: "#87A0BC",
   },
   buttonSlateSubtleDark: {
     backgroundColor: "#333", // Dark grey background
