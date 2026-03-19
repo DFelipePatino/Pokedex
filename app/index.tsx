@@ -148,7 +148,7 @@ export default function Index() {
           </Pressable>
 
           <Pressable
-            style={isDark ? styles.buttonTealActionDark : styles.buttonTealAction}
+            style={isDark ? styles.buttonSlateSubtleDark2 : styles.buttonSlateInfo2}
             onPress={() => router.push("/savedPokemon")}
           >
             <Text style={isDark ? styles.textDark : styles.textLight}>
@@ -280,6 +280,13 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     opacity: 0.8,
   },
+  buttonSlateInfo2: {
+    backgroundColor: "#C22E28",
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 5,
+    opacity: 0.8,
+  },
 
   buttonTealActionDark: {
     backgroundColor: "#1e4343ff",
@@ -298,6 +305,14 @@ const styles = StyleSheet.create({
   },
   buttonSlateSubtleDark: {
     backgroundColor: "#333", // Dark grey background
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 5,
+    opacity: 0.7, // Muted presence
+    // color: "#87A0BC" // Lighter slate blue for text
+  },
+  buttonSlateSubtleDark2: {
+    backgroundColor: "#f955865a", // Dark grey background
     padding: 12,
     borderRadius: 8,
     marginVertical: 5,

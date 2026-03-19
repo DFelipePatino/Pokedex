@@ -81,7 +81,7 @@ export default function YourPokemon() {
 
         // Ensure we actually have content for the AI to generate from
         if (name && type && locationsStr.length > 0 && abilitiesStr.length > 0 && movesStr.length > 0) {
-            setPrompt(`${name} is a ${type} pokemon that has the abilities ${abilitiesStr} and moves ${movesStr} in the style of pokemon official artwork`);
+            setPrompt(`${name} is a ${type} pokemon that is found in ${locationsStr} and has the abilities ${abilitiesStr} and moves ${movesStr} in the style of pokemon official artwork`);
         }
     }, [newPokemon]);
 
