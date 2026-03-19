@@ -19,8 +19,6 @@ import { colorsByType } from "../constants/colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { savePokemonToDB } from "../utils/database";
 
-
-// The static list of locations you provided
 const LOCATION_LIST = [
     "berry forest-area", "bond bridge-area", "cerulean city-area", "five isle-meadow-area",
     "kanto route-1-area", "kanto route-2-north-towards-pewter-city", "kanto route-2-south-towards-viridian-city",
@@ -44,6 +42,7 @@ const LOCATION_LIST = [
 
 
 export default function YourPokemon() {
+
     const [imageVisible, setImageVisible] = useState(false);
     const [isDark, setIsDark] = useState(false);
     const [newPokemon, setNewPokemon] = useState({
@@ -72,14 +71,12 @@ export default function YourPokemon() {
     useEffect(() => {
         const { name, type, whereToFind, abilities, moves } = newPokemon;
 
-        // Format the arrays correctly into comma-separated strings for the prompt
         const abilitiesStr = Array.isArray(abilities)
             ? abilities.map((a: any) => typeof a === 'object' ? a.name : a).join(", ")
             : abilities;
         const movesStr = Array.isArray(moves) ? moves.join(", ") : moves;
         const locationsStr = Array.isArray(whereToFind) ? whereToFind.join(", ") : whereToFind;
 
-        // Ensure we actually have content for the AI to generate from
         if (name && type && locationsStr.length > 0 && abilitiesStr.length > 0 && movesStr.length > 0) {
             setPrompt(`${name} is a ${type} pokemon that is found in ${locationsStr} and has the abilities ${abilitiesStr} and moves ${movesStr} in the style of pokemon official artwork`);
         }
@@ -134,27 +131,25 @@ export default function YourPokemon() {
     useEffect(() => {
         const fetchPokemonData = async () => {
             try {
-                // 1. Fetch from the 3 endpoints
-                // We use limit=1000 for moves/abilities to get everything
                 const [typesRes, abilitiesRes, movesRes] = await Promise.all([
                     fetch("https://pokeapi.co/api/v2/type/").then(res => res.json()),
                     fetch("https://pokeapi.co/api/v2/ability/?limit=500").then(res => res.json()),
                     fetch("https://pokeapi.co/api/v2/move/?limit=1000").then(res => res.json())
                 ]);
 
-                // 2. Helper function to format API results for dropdowns
+
                 const formatData = (data) => data.results.map(item => ({
                     label: item.name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
                     value: item.name
                 }));
 
-                // 3. Format the static location list
+
                 const formattedLocations = LOCATION_LIST.map(loc => ({
                     label: loc.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
                     value: loc
                 }));
 
-                // 4. Update the state
+
                 setFormData({
                     types: formatData(typesRes),
                     abilities: formatData(abilitiesRes),
@@ -186,13 +181,13 @@ export default function YourPokemon() {
                 ]}
             >
                 {!imageUrl && !loading ? (
-                    /* --- Input Section: Only shows when no image is generated --- */
+
                     <View style={styles.aiSection}>
                         <Text style={[styles.aiTitle, { color: isDark ? '#fff' : '#000' }]}>
                             Create Your Own Pokemon
                         </Text>
 
-                        {/* NAME - Remains a TextInput */}
+
                         <TextInput
                             style={styles.input}
                             placeholder="Name"
@@ -201,7 +196,7 @@ export default function YourPokemon() {
                             onChangeText={(text) => setNewPokemon({ ...newPokemon, name: text })}
                         />
 
-                        {/* TYPE DROPDOWN */}
+
                         <Dropdown
                             style={styles.dropdown}
                             placeholderStyle={styles.placeholderStyle}
@@ -218,7 +213,7 @@ export default function YourPokemon() {
                             onChange={item => setNewPokemon({ ...newPokemon, type: item.value })}
                         />
 
-                        {/* LOCATION DROPDOWN */}
+
                         <MultiSelect
                             style={styles.dropdown}
                             data={formData.locations}
@@ -240,7 +235,7 @@ export default function YourPokemon() {
                             )}
                         />
 
-                        {/* ABILITIES DROPDOWN */}
+
                         <MultiSelect
                             style={styles.dropdown}
                             data={formData.abilities}
@@ -248,10 +243,10 @@ export default function YourPokemon() {
                             valueField="value"
                             placeholder="Select Abilities"
                             search
-                            // 1. IMPORTANT: The value prop needs the raw strings to "highlight" items in the list
+
                             value={newPokemon.abilities.map(obj => obj.name)}
 
-                            // 2. The onChange transforms the strings into your object structure
+
                             onChange={selectedStrings => {
                                 const objectArray = selectedStrings.map(str => ({
                                     name: str
@@ -269,7 +264,7 @@ export default function YourPokemon() {
                             )}
                         />
 
-                        {/* MOVES DROPDOWN */}
+
                         <MultiSelect
                             style={styles.dropdown}
                             data={formData.moves}
@@ -302,7 +297,7 @@ export default function YourPokemon() {
                         </TouchableOpacity>
                     </View>
                 ) : (
-                    /* --- Result Section: Follows your exact structure --- */
+
                     <View style={[styles.card, { backgroundColor }]}>
                         <Text style={styles.name}>{newPokemon.name}</Text>
                         <Text style={styles.typeText}>{newPokemon.type}</Text>
@@ -366,7 +361,7 @@ export default function YourPokemon() {
                 )}
             </ScrollView>
 
-            {/* Full Screen Image Modal */}
+
             <Modal visible={imageVisible} transparent animationType="fade">
                 <Pressable style={styles.modalContainer} onPress={() => setImageVisible(false)}>
                     <Image source={{ uri: imageUrl }} style={styles.fullImage} resizeMode="contain" />

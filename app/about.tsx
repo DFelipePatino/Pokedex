@@ -12,12 +12,15 @@ import {
     Pressable,
     Modal,
 } from "react-native";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import { colorsByType } from "../constants/colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
+
 export default function About() {
+
+
     const author = {
         name: "Daniel Felipe Patino",
         role: "Software Developer",
@@ -25,7 +28,7 @@ export default function About() {
         linkedin: "https://www.linkedin.com/in/daniel-patino-207156208/",
         github: "https://github.com/DFelipePatino",
         portfolio: "https://danielpatinoportfolio.onrender.com/",
-        description: "I'm a Full Stack Developer with expertise in JavaScript, React, Redux, WordPress, PHP, HTML, CSS, Django, Express, and AWS services. I specialize in creating modern, responsive UIs with Material UI and leveraging AWS for scalable and reliable applications. With a strong commitment to continuous learning and agile methodologies like SCRUM, I excel in both individual and team environments, delivering high-quality solutions efficiently. Let's connect and explore how I can bring value to your next project!",
+        description: `I'm a Full Stack Developer with expertise in JavaScript, React, Redux, WordPress, PHP, HTML, CSS, Django, Express, and AWS services. I specialize in creating modern, responsive UIs with Material UI and leveraging AWS for scalable and reliable applications. With a strong commitment to continuous learning and agile methodologies like SCRUM, I excel in both individual and team environments, delivering high-quality solutions efficiently. Let's connect and explore how I can bring value to your next project!`,
     };
 
     const [imageVisible, setImageVisible] = useState(false);
@@ -54,6 +57,7 @@ export default function About() {
                     { backgroundColor: isDark ? "#232323" : backgroundColor + "33" },
                 ]}
             >
+
                 <View style={[styles.card, { backgroundColor }]}>
                     <Text style={styles.name}>{author.name}</Text>
                     <Text style={styles.type}>{author.role}</Text>
@@ -87,10 +91,13 @@ export default function About() {
                             <Text style={{ color: isDark ? '#ddd' : '#333', lineHeight: 22 }}>
                                 {author.description}
                             </Text>
+                            <Pressable onPress={() => router.push("/imageGenerator")} style={styles.chip2}>
+                                <Text style={styles.chipText}></Text>
+                            </Pressable>
                         </View>
                     </View>
                 </View>
-            </ScrollView>
+            </ScrollView >
 
             <Modal visible={imageVisible} transparent animationType="fade">
                 <Pressable style={styles.modalContainer} onPress={() => setImageVisible(false)}>
@@ -141,6 +148,7 @@ const styles = StyleSheet.create({
     sectionTitle: { fontSize: 22, fontWeight: "bold", marginBottom: 10 },
     infoList: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
     chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.7)" },
+    chip2: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, marginTop: 220 },
     chipText: { fontWeight: '600', color: '#000' },
     modalContainer: { flex: 1, backgroundColor: "rgba(0,0,0,0.9)", justifyContent: "center", alignItems: "center" },
     fullImage: { width: "100%", height: "100%" },

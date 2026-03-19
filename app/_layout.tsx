@@ -89,6 +89,24 @@ export default function RootLayout() {
             headerBackButtonDisplayMode: "minimal",
           }}
         />
+
+
+
+        <Stack.Screen
+          name="imageGenerator"
+          options={{
+            title: "Image Generator",
+            headerStyle: {
+              backgroundColor: isDark ? "#232323ff" : "#fff",
+            },
+            headerTitleStyle: {
+              color: "#fff",
+            },
+            headerBackButtonDisplayMode: "minimal",
+          }}
+        />
+
+
       </Stack>
     </GestureHandlerRootView>
   );
