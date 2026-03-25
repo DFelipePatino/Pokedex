@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
     typeText: { fontSize: 18, fontWeight: "bold", color: "rgba(255,255,255,0.8)", textAlign: "center", marginBottom: 10, textTransform: 'capitalize' },
     imagesRow: { alignItems: "center", marginVertical: 10 },
 
-    aiSection: { padding: 20, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20 },
+    aiSection: { padding: 20, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20, flex: 1 },
     aiTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
     input: { backgroundColor: '#fff', borderRadius: 12, padding: 15, marginBottom: 10, fontSize: 16 },
     button: { backgroundColor: '#007AFF', padding: 16, borderRadius: 12, alignItems: 'center' },

@@ -127,6 +127,7 @@ export default function Index() {
     useRef(new Animated.Value(0)).current,
     useRef(new Animated.Value(0)).current,
     useRef(new Animated.Value(0)).current,
+    useRef(new Animated.Value(1)).current,
   ];
 
   useEffect(() => {
@@ -147,6 +148,7 @@ export default function Index() {
 
 
   const opacitys = [
+    useRef(new Animated.Value(1)).current,
     useRef(new Animated.Value(1)).current,
     useRef(new Animated.Value(1)).current,
     useRef(new Animated.Value(1)).current,
@@ -183,6 +185,20 @@ export default function Index() {
           useNativeDriver: true,
         }),
       ]).start();
+    } else if (index === 5) {
+      Animated.sequence([
+        Animated.timing(scales[5], {
+          toValue: 0,
+          duration: 5,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scales[5], {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
     }
   };
 
@@ -263,6 +279,7 @@ export default function Index() {
     try {
       setLoading(true);
       setError(false);
+      opacityTransition(5);
 
       const response = await fetch(
         `https://pokeapi.co/api/v2/pokemon/${searchText}`
@@ -276,6 +293,7 @@ export default function Index() {
       };
       setSearchedPokemon([searchedPokemon]);
       setError(false);
+
     } catch (error) {
       setError(true);
     } finally {
@@ -289,7 +307,7 @@ export default function Index() {
     <>
 
       {!showLanding && (
-        <Animated.View style={{ flex: 1, opacity: opacitys[0] }}>
+        <Animated.View style={{ opacity: opacitys[0], flexGrow: 1 }}>
           {showButton && (
             <View style={isDark ? styles.buttonsContainerDark : styles.buttonsContainer}>
               {buttons.map((btn, index) => (
@@ -343,7 +361,7 @@ export default function Index() {
                   const mainType = pokemon.types[0].type.name;
 
                   return (
-                    <Animated.View key={pokemon.name} style={{ flexGrow: 1, transform: [{ scale: scales[0] }] }}>
+                    <Animated.View key={pokemon.name} style={{ opacity: opacitys[0], flexGrow: 1, transform: [{ scale: scales[0] }] }}>
                       <Link
                         href={{
                           pathname: "/details",
@@ -381,7 +399,7 @@ export default function Index() {
                     const mainType = pokemon.types[0].type.name;
 
                     return (
-                      <Animated.View key={pokemon.name} style={{ flexGrow: 1, transform: [{ scale: scales[0] }] }}>
+                      <Animated.View key={pokemon.name} style={{ opacity: opacitys[5], flexGrow: 1, transform: [{ scale: scales[5] }] }}>
                         <Link
                           href={{
                             pathname: "/details",
@@ -423,6 +441,9 @@ export default function Index() {
         </Animated.View>
       )}
 
+
+
+
       {showLanding ? (
         <>
           <Landing />
@@ -444,6 +465,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   containerDark: {
+    flex: 1,
     padding: 16,
     gap: 16,
     display: "flex",
@@ -461,11 +483,11 @@ const styles = StyleSheet.create({
   },
   buttonsContainerDark: {
     backgroundColor: "#232323ff",
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   buttonTealAction: {
