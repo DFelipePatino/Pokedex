@@ -41,8 +41,9 @@ export default function ImageGenerator() {
 
         const seed = Math.floor(Math.random() * 1000000);
         const myApiKey = process.env.EXPO_PUBLIC_POLLINATIONS_API_KEY || "";
-        const models = ["dirtberry", "flux-2-dev", "flux"];
-        const randomModel = models[Math.floor(Math.random() * models.length)];
+        const models = ["zimage", "flux"];
+        // const randomModel = models[Math.floor(Math.random() * models.length)];
+        const randomModel = models[0];
 
         const url = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=${randomModel}&width=1024&height=1024&seed=${seed}&nologo=true&key=${myApiKey}`;
         setImageUrl(url);

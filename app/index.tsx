@@ -15,6 +15,7 @@ import {
 import { colorsByType } from "../constants/colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Landing from "./landing";
+import { TextInput } from "react-native-gesture-handler";
 
 interface PokemonType {
   type: {
@@ -223,6 +224,65 @@ export default function Index() {
     },
   ];
 
+  const [searchedPokemon, setSearchedPokemon] = useState([]);
+  const [query, setQuery] = useState("");
+  const [error, setError] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
+    if (debouncedQuery) {
+      fetchData(debouncedQuery);
+    }
+  }, [debouncedQuery]);
+
+  useEffect(() => {
+    if (query.length === 0) {
+      setSearchedPokemon([]);
+      setError(false);
+    }
+  }, [query]);
+
+
+  useEffect(() => {
+    if (query.length !== 0) {
+      setError(false);
+      setLoading(true);
+    }
+  }, []);
+
+  const fetchData = async (searchText) => {
+    if (loading) return;
+    try {
+      setLoading(true);
+      setError(false);
+
+      const response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/${searchText}`
+      );
+      const data = await response.json();
+      const searchedPokemon = {
+        name: data.name,
+        image: data.sprites.front_default,
+        imageBack: data.sprites.back_default,
+        types: data.types,
+      };
+      setSearchedPokemon([searchedPokemon]);
+      setError(false);
+    } catch (error) {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
 
@@ -250,40 +310,108 @@ export default function Index() {
             </View>
           )}
 
+
+          <View style={{
+            padding: 20,
+            backgroundColor: isDark ? "#1a1a1aff" : "#e4e4e4ff",
+          }}>
+            <TextInput
+              placeholder="Search Pokemon by name or number..."
+              value={query}
+              onChangeText={setQuery}
+              placeholderTextColor={isDark ? "#f1f1f1" : "#232323ff"} // ✅ correct place
+              style={{
+                height: 40,
+                borderRadius: 10,
+                paddingHorizontal: 10,
+                backgroundColor: isDark ? "#232323ff" : "#f1f1f1",
+                color: isDark ? "#f1f1f1" : "#232323ff",
+              }}
+            />
+          </View>
+
           <ScrollView key={1}
             contentContainerStyle={!isDark ? styles.container : styles.containerDark}
             onScroll={handleScroll}
             scrollEventThrottle={16}
           >
-            {pokemons.map((pokemon) => {
-              const mainType = pokemon.types[0].type.name;
 
-              return (
-                <Animated.View key={pokemon.name} style={{ flexGrow: 1, transform: [{ scale: scales[0] }] }}>
-                  <Link
-                    href={{
-                      pathname: "/details",
-                      params: { name: pokemon.name },
-                    }}
-                  >
-                    <View
-                      style={[
-                        styles.card,
-                        { backgroundColor: colorsByType[mainType] + "55" },
-                      ]}
-                    >
-                      <Text style={styles.name}>{pokemon.name}</Text>
-                      <Text style={styles.type}>{mainType}</Text>
+            {
+              searchedPokemon.length === 0 && query.length === 0 ? (
+                // 🔹 No search → show all pokemons
+                pokemons.map((pokemon) => {
+                  const mainType = pokemon.types[0].type.name;
 
-                      <View style={styles.imagesRow}>
-                        <Image source={{ uri: pokemon.image }} style={styles.image} />
-                        <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
-                      </View>
-                    </View>
-                  </Link>
-                </Animated.View>
-              );
-            })}
+                  return (
+                    <Animated.View key={pokemon.name} style={{ flexGrow: 1, transform: [{ scale: scales[0] }] }}>
+                      <Link
+                        href={{
+                          pathname: "/details",
+                          params: { name: pokemon.name },
+                        }}
+                      >
+                        <View
+                          style={[
+                            styles.card,
+                            { backgroundColor: colorsByType[mainType] + "55" },
+                          ]}
+                        >
+                          <Text style={styles.name}>{pokemon.name}</Text>
+                          <Text style={styles.type}>{mainType}</Text>
+
+                          <View style={styles.imagesRow}>
+                            <Image source={{ uri: pokemon.image }} style={styles.image} />
+                            <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
+                          </View>
+                        </View>
+                      </Link>
+                    </Animated.View>
+                  );
+                })
+              ) : error
+                // || query.length === 0 
+                ? (
+                  // 🔸 Search active but no results
+                  <Text style={{ textAlign: "center", marginTop: 20 }}>
+                    No Pokémon found 😢
+                  </Text>
+                ) : (
+                  // 🔹 Search results
+                  searchedPokemon.map((pokemon) => {
+                    const mainType = pokemon.types[0].type.name;
+
+                    return (
+                      <Animated.View key={pokemon.name} style={{ flexGrow: 1, transform: [{ scale: scales[0] }] }}>
+                        <Link
+                          href={{
+                            pathname: "/details",
+                            params: { name: pokemon.name },
+                          }}
+                        >
+                          <View
+                            style={[
+                              styles.card,
+                              { backgroundColor: colorsByType[mainType] + "55" },
+                            ]}
+                          >
+                            <Text style={styles.name}>{pokemon.name}</Text>
+                            <Text style={styles.type}>{mainType}</Text>
+
+                            <View style={styles.imagesRow}>
+                              <Image source={{ uri: pokemon.image }} style={styles.image} />
+                              <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
+                            </View>
+                          </View>
+                        </Link>
+                      </Animated.View>
+                    );
+                  })
+                )
+            }
+
+
+
+
 
             {loading && (
               <ActivityIndicator
@@ -435,5 +563,13 @@ const styles = StyleSheet.create({
   image: {
     width: 150,
     height: 150,
+  },
+
+
+  input: {
+    height: 40,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    backgroundColor: "#f1f1f1",
   },
 });
