@@ -307,7 +307,7 @@ export default function Index() {
     <>
 
       {!showLanding && (
-        <Animated.View style={{ opacity: opacitys[0], flexGrow: 1 }}>
+        <Animated.View style={{ flex: 1, opacity: opacitys[0] }}>
           {showButton && (
             <View style={isDark ? styles.buttonsContainerDark : styles.buttonsContainer}>
               {buttons.map((btn, index) => (
@@ -337,7 +337,7 @@ export default function Index() {
               placeholder="Search Pokemon by name or number..."
               value={query}
               onChangeText={setQuery}
-              placeholderTextColor={isDark ? "#f1f1f1" : "#232323ff"} // ✅ correct place
+              placeholderTextColor={isDark ? "#f1f1f1" : "#232323ff"}
               style={{
                 height: 40,
                 borderRadius: 10,
@@ -390,7 +390,7 @@ export default function Index() {
                 // || query.length === 0 
                 ? (
                   // 🔸 Search active but no results
-                  <Text style={{ textAlign: "center", marginTop: 20 }}>
+                  <Text style={{ textAlign: "center", marginTop: 20, color: isDark ? "#f1f1f1" : "#232323ff", fontSize: 20, fontWeight: "bold", marginBottom: 20, flexGrow: 1, flex: 1, justifyContent: "center", alignItems: "center", alignSelf: "center", minHeight: 650 }}>
                     No Pokémon found 😢
                   </Text>
                 ) : (
@@ -399,7 +399,7 @@ export default function Index() {
                     const mainType = pokemon.types[0].type.name;
 
                     return (
-                      <Animated.View key={pokemon.name} style={{ opacity: opacitys[5], flexGrow: 1, transform: [{ scale: scales[5] }] }}>
+                      <Animated.View key={pokemon.name} style={{ opacity: opacitys[5], flexGrow: 1, transform: [{ scale: scales[5] }], flex: 1, minHeight: 650 }}>
                         <Link
                           href={{
                             pathname: "/details",
@@ -434,7 +434,7 @@ export default function Index() {
             {loading && (
               <ActivityIndicator
                 size="large"
-                style={{ marginVertical: 24 }}
+                style={{ marginVertical: 24, flex: 1, justifyContent: "center", alignItems: "center", alignSelf: "center", minHeight: 650 }}
               />
             )}
           </ScrollView>
@@ -465,7 +465,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   containerDark: {
-    flex: 1,
+    // flex: 1,
     padding: 16,
     gap: 16,
     display: "flex",
@@ -483,11 +483,11 @@ const styles = StyleSheet.create({
   },
   buttonsContainerDark: {
     backgroundColor: "#232323ff",
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 10,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   buttonTealAction: {
