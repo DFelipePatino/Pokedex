@@ -7,15 +7,15 @@ import {
   Text,
   View,
   ActivityIndicator,
-  Button,
   Pressable,
   Animated,
-  Easing,
 } from "react-native";
 import { colorsByType } from "../constants/colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Landing from "./landing";
-import { TextInput } from "react-native-gesture-handler";
+import { TextInput } from "react-native";
+import { AnimationController } from "./AnimationController";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface PokemonType {
   type: {
@@ -34,173 +34,52 @@ interface Pokemon {
 const LIMIT = 20;
 
 export default function Index() {
+
+  const anim = useRef(new AnimationController()).current;
+
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
   const [showMain, setShowMain] = useState(false);
-
-  useEffect(() => {
-    fetchPokemons();
-  }, [page]);
-
-  async function fetchPokemons() {
-    if (loading) return;
-
-    try {
-      setLoading(true);
-
-      const response = await fetch(
-        `https://pokeapi.co/api/v2/pokemon?limit=${LIMIT}&offset=${page * LIMIT}`
-      );
-
-      const data = await response.json();
-
-      const detailedPokemons: Pokemon[] = await Promise.all(
-        data.results.map(async (pokemon: any) => {
-          const res = await fetch(pokemon.url);
-          const details = await res.json();
-
-          return {
-            name: pokemon.name,
-            image: details.sprites.front_default,
-            imageBack: details.sprites.back_default,
-            types: details.types,
-          };
-        })
-      );
-
-      setPokemons(prev => {
-        const existingNames = new Set(prev.map(p => p.name));
-
-        const filtered = detailedPokemons.filter(
-          p => !existingNames.has(p.name)
-        );
-
-        return [...prev, ...filtered];
-      });
-
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function handleScroll({ nativeEvent }: any) {
-    const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
-
-    const isCloseToBottom =
-      layoutMeasurement.height + contentOffset.y >=
-      contentSize.height - 200;
-
-    if (isCloseToBottom && !loading) {
-      setPage(prev => prev + 1);
-    }
-
-    const currentY = contentOffset.y;
-
-    if (currentY > lastScrollY && currentY > 50) {
-      // scrolling down
-      setShowButton(false);
-    } else {
-      // scrolling up
-      setShowButton(true);
-    }
-
-    setLastScrollY(currentY);
-  }
-
   const [showButton, setShowButton] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const [showButtonFlag, setShowButtonFlag] = useState(false);
+  const [searchedPokemon, setSearchedPokemon] = useState<Pokemon[]>([]);
+  const [query, setQuery] = useState("");
+  const [error, setError] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  // keep class in sync with React state
+  anim.showButton = showButton;
+  anim.showButtonFlag = showButtonFlag;
+
+  const opacityTransition = (index: number) => {
+    anim.opacityTransition(index, () => setIsDark(prev => !prev));
+  };
+
+  const handleScroll = ({ nativeEvent }: any) => {
+    anim.handleScroll(
+      nativeEvent,
+      () => setPage(prev => prev + 1),
+      loading,
+      setShowButton,
+      setShowButtonFlag,
+    );
+  };
+
+  const getButtonStyle = () => {
+    if (isDark) return styles.buttonSlateSubtleDark;
+    return styles.buttonSlateInfo;
+  };
 
   useEffect(() => {
     AsyncStorage.setItem('theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
-
-
-  const scales = [
-    useRef(new Animated.Value(0)).current,
-    useRef(new Animated.Value(0)).current,
-    useRef(new Animated.Value(0)).current,
-    useRef(new Animated.Value(0)).current,
-    useRef(new Animated.Value(0)).current,
-    useRef(new Animated.Value(1)).current,
-  ];
-
   useEffect(() => {
-    if (showMain) {
-      Animated.stagger(
-        200,
-        scales.map(scale =>
-          Animated.timing(scale, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          })
-        )
-      ).start();
-    }
-  }, [showMain]);
-
-
-
-  const opacitys = [
-    useRef(new Animated.Value(1)).current,
-    useRef(new Animated.Value(1)).current,
-    useRef(new Animated.Value(1)).current,
-    useRef(new Animated.Value(1)).current,
-    useRef(new Animated.Value(1)).current,
-    useRef(new Animated.Value(1)).current,
-  ]
-
-  const opacityTransition = (index: number) => {
-    const currentOpacity = opacitys[index];
-    if (index === 0) {
-      Animated.sequence([
-        Animated.timing(currentOpacity, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(currentOpacity, {
-          toValue: 1,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start();
-      setTimeout(() => setIsDark(!isDark), 150);
-    } else if (index === 4) {
-      Animated.sequence([
-        Animated.timing(currentOpacity, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(currentOpacity, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else if (index === 5) {
-      Animated.sequence([
-        Animated.timing(scales[5], {
-          toValue: 0,
-          duration: 5,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scales[5], {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-    }
-  };
+    fetchPokemons();
+  }, [page]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -208,13 +87,8 @@ export default function Index() {
       setShowMain(true);
     }, 1000);
 
-    const t1 = setTimeout(() => {
-      opacityTransition(0);
-    }, 2800);
-
-    const t2 = setTimeout(() => {
-      opacityTransition(4);
-    }, 3600);
+    const t1 = setTimeout(() => opacityTransition(0), 2800);
+    const t2 = setTimeout(() => opacityTransition(4), 3600);
 
     return () => {
       clearTimeout(timer);
@@ -223,33 +97,16 @@ export default function Index() {
     };
   }, []);
 
-  const getButtonStyle = () => {
-    if (isDark) return styles.buttonSlateSubtleDark;
-    if (!isDark) return styles.buttonSlateInfo;
-  };
-
-  const buttons = [
-    { label: "Pokemon Master", action: () => router.push("/about"), style: isDark ? styles.buttonTealActionDark : styles.buttonTealAction },
-    { label: "Create Your Pokemon", action: () => router.push("/yourPokemon"), style: isDark ? styles.buttonBrownDeepDark : styles.buttonBrownSubtle },
-    { label: "My Pokédex", action: () => router.push("/savedPokemon"), style: isDark ? styles.buttonSlateSubtleDark2 : styles.buttonSlateInfo2 },
-    {
-      label: isDark ? "Light Mode" : "Dark Mode", action: () => { opacityTransition(0) }
-      , style: getButtonStyle(),
-
-
-    },
-  ];
-
-  const [searchedPokemon, setSearchedPokemon] = useState([]);
-  const [query, setQuery] = useState("");
-  const [error, setError] = useState(false);
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  useEffect(() => {
+    if (showMain) {
+      anim.startEntryAnimation();
+    }
+  }, [showMain]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(query);
     }, 2000);
-
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -266,34 +123,56 @@ export default function Index() {
     }
   }, [query]);
 
-
-  useEffect(() => {
-    if (query.length !== 0) {
-      setError(false);
+  async function fetchPokemons() {
+    if (loading) return;
+    try {
       setLoading(true);
+      const response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon?limit=${LIMIT}&offset=${page * LIMIT}`
+      );
+      const data = await response.json();
+      const detailedPokemons: Pokemon[] = await Promise.all(
+        data.results.map(async (pokemon: any) => {
+          const res = await fetch(pokemon.url);
+          const details = await res.json();
+          return {
+            name: pokemon.name,
+            image: details.sprites.front_default,
+            imageBack: details.sprites.back_default,
+            types: details.types,
+          };
+        })
+      );
+      setPokemons(prev => {
+        const existingNames = new Set(prev.map(p => p.name));
+        const filtered = detailedPokemons.filter(p => !existingNames.has(p.name));
+        return [...prev, ...filtered];
+      });
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }
 
-  const fetchData = async (searchText) => {
+  const fetchData = async (searchText: string) => {
     if (loading) return;
     try {
       setLoading(true);
       setError(false);
       opacityTransition(5);
-
       const response = await fetch(
         `https://pokeapi.co/api/v2/pokemon/${searchText}`
       );
       const data = await response.json();
-      const searchedPokemon = {
+      const found: Pokemon = {
         name: data.name,
         image: data.sprites.front_default,
         imageBack: data.sprites.back_default,
         types: data.types,
       };
-      setSearchedPokemon([searchedPokemon]);
+      setSearchedPokemon([found]);
       setError(false);
-
     } catch (error) {
       setError(true);
     } finally {
@@ -301,82 +180,99 @@ export default function Index() {
     }
   };
 
+  const buttons = [
+    { label: "Master", icon: "medal", action: () => router.push("/about"), color: '#4fd1c5' },
+    { label: "Create", icon: "plus-circle", action: () => router.push("/yourPokemon"), color: '#ed8936' },
+    { label: "Pokédex", icon: "book-open-variant", action: () => router.push("/savedPokemon"), color: '#63b3ed' },
+    {
+      label: isDark ? "Light" : "Dark",
+      icon: isDark ? "weather-sunny" : "weather-night",
+      action: () => opacityTransition(0),
+      color: '#a0aec0'
+    },
+  ];
 
   return (
-
     <>
-
       {!showLanding && (
-        <Animated.View style={{ flex: 1, opacity: opacitys[0] }}>
-          {showButton && (
-            <View style={isDark ? styles.buttonsContainerDark : styles.buttonsContainer}>
-              {buttons.map((btn, index) => (
-                <Animated.View
-                  key={index}
-                  style={{ opacity: opacitys[index + 1], flexGrow: 1, transform: [{ scale: scales[index + 1] }] }}
-                >
-                  <Pressable
-                    style={btn.style}
-                    onPress={btn.action}
+        <View style={{ flex: 1, height: '100vh' }}>
+          <Animated.View style={{ opacity: anim.opacitys[0], flex: 1 }}>
+
+            {showButton && (
+              <Animated.View style={[
+                isDark ? styles.navContainerDark : styles.navContainer,
+                { transform: [{ scale: anim.scales[5] }] }
+              ]}>
+                {buttons.map((btn, index) => (
+                  <Animated.View
+                    key={index}
+                    style={{
+                      opacity: anim.opacitys[index + 1],
+                      transform: [{ scale: anim.scales[index + 1] }],
+                    }}
                   >
-                    <Text style={isDark ? styles.textDark : styles.textLight}>
-                      {btn.label}
-                    </Text>
-                  </Pressable>
-                </Animated.View>
-              ))}
+                    <Pressable
+                      onPress={btn.action}
+                      style={({ pressed }) => [
+                        styles.navButton,
+                        {
+                          backgroundColor: isDark ? '#2d3748' : '#ffffff',
+                          transform: [{ scale: pressed ? 0.95 : 1 }]
+                        } // Haptic feel
+                      ]}
+                    >
+                      <MaterialCommunityIcons name={btn.icon} size={22} color={btn.color} />
+                      <Text style={[styles.navText, { color: isDark ? '#e2e8f0' : '#2d3748' }]}>
+                        {btn.label}
+                      </Text>
+                    </Pressable>
+                  </Animated.View>
+                ))}
+              </Animated.View>
+            )}
+
+            <View style={{
+              padding: 20,
+              backgroundColor: isDark ? "rgba(26, 26, 26, 0.7)" : "rgba(228, 228, 228, 0.7)",
+            }}>
+              <TextInput
+                placeholder="Search Pokemon by name or number..."
+                value={query}
+                onChangeText={setQuery}
+                placeholderTextColor={isDark ? "#f1f1f1" : "#232323ff"}
+                style={{
+                  height: 40,
+                  borderRadius: 10,
+                  paddingHorizontal: 10,
+                  backgroundColor: isDark ? "rgba(35, 35, 35, 0.6)" : "rgba(241, 241, 241, 0.6)",
+                  color: isDark ? "#f1f1f1" : "#232323ff",
+                }}
+              />
             </View>
-          )}
 
-
-          <View style={{
-            padding: 20,
-            backgroundColor: isDark ? "#1a1a1aff" : "#e4e4e4ff",
-          }}>
-            <TextInput
-              placeholder="Search Pokemon by name or number..."
-              value={query}
-              onChangeText={setQuery}
-              placeholderTextColor={isDark ? "#f1f1f1" : "#232323ff"}
-              style={{
-                height: 40,
-                borderRadius: 10,
-                paddingHorizontal: 10,
-                backgroundColor: isDark ? "#232323ff" : "#f1f1f1",
-                color: isDark ? "#f1f1f1" : "#232323ff",
-              }}
-            />
-          </View>
-
-          <ScrollView key={1}
-            contentContainerStyle={!isDark ? styles.container : styles.containerDark}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-          >
-
-            {
-              searchedPokemon.length === 0 && query.length === 0 ? (
-                // 🔹 No search → show all pokemons
+            <ScrollView
+              key={1}
+              contentContainerStyle={isDark ? styles.containerDark : styles.container}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+              style={{ flex: 1 }}
+            >
+              {searchedPokemon.length === 0 && query.length === 0 ? (
                 pokemons.map((pokemon) => {
                   const mainType = pokemon.types[0].type.name;
-
                   return (
-                    <Animated.View key={pokemon.name} style={{ opacity: opacitys[0], flexGrow: 1, transform: [{ scale: scales[0] }] }}>
-                      <Link
-                        href={{
-                          pathname: "/details",
-                          params: { name: pokemon.name },
-                        }}
-                      >
-                        <View
-                          style={[
-                            styles.card,
-                            { backgroundColor: colorsByType[mainType] + "55" },
-                          ]}
-                        >
+                    <Animated.View
+                      key={pokemon.name}
+                      style={{
+                        opacity: anim.opacitys[0],
+                        flexGrow: 1,
+                        transform: [{ scale: anim.scales[0] }],
+                      }}
+                    >
+                      <Link href={{ pathname: "/details", params: { name: pokemon.name } }}>
+                        <View style={[styles.card, { backgroundColor: colorsByType[mainType] + "55" }]}>
                           <Text style={styles.name}>{pokemon.name}</Text>
                           <Text style={styles.type}>{mainType}</Text>
-
                           <View style={styles.imagesRow}>
                             <Image source={{ uri: pokemon.image }} style={styles.image} />
                             <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
@@ -386,74 +282,70 @@ export default function Index() {
                     </Animated.View>
                   );
                 })
-              ) : error
-                // || query.length === 0 
-                ? (
-                  // 🔸 Search active but no results
-                  <Text style={{ textAlign: "center", marginTop: 20, color: isDark ? "#f1f1f1" : "#232323ff", fontSize: 20, fontWeight: "bold", marginBottom: 20, flexGrow: 1, flex: 1, justifyContent: "center", alignItems: "center", alignSelf: "center", minHeight: 650 }}>
-                    No Pokémon found 😢
-                  </Text>
-                ) : (
-                  // 🔹 Search results
-                  searchedPokemon.map((pokemon) => {
-                    const mainType = pokemon.types[0].type.name;
-
-                    return (
-                      <Animated.View key={pokemon.name} style={{ opacity: opacitys[5], flexGrow: 1, transform: [{ scale: scales[5] }], flex: 1, minHeight: 650 }}>
-                        <Link
-                          href={{
-                            pathname: "/details",
-                            params: { name: pokemon.name },
-                          }}
-                        >
-                          <View
-                            style={[
-                              styles.card,
-                              { backgroundColor: colorsByType[mainType] + "55" },
-                            ]}
-                          >
-                            <Text style={styles.name}>{pokemon.name}</Text>
-                            <Text style={styles.type}>{mainType}</Text>
-
-                            <View style={styles.imagesRow}>
-                              <Image source={{ uri: pokemon.image }} style={styles.image} />
-                              <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
-                            </View>
+              ) : error ? (
+                <Text style={{
+                  textAlign: "center",
+                  marginTop: 20,
+                  color: isDark ? "#f1f1f1" : "#232323ff",
+                  fontSize: 20,
+                  fontWeight: "bold",
+                  marginBottom: 20,
+                  flexGrow: 1,
+                  alignSelf: "center",
+                  minHeight: 650,
+                }}>
+                  No Pokémon found 😢
+                </Text>
+              ) : (
+                searchedPokemon.map((pokemon) => {
+                  const mainType = pokemon.types[0].type.name;
+                  return (
+                    <Animated.View
+                      key={pokemon.name}
+                      style={{
+                        opacity: anim.opacitys[5],
+                        flexGrow: 1,
+                        transform: [{ scale: anim.scales[5] }],
+                        flex: 1,
+                        minHeight: 650,
+                      }}
+                    >
+                      <Link href={{ pathname: "/details", params: { name: pokemon.name } }}>
+                        <View style={[styles.card, { backgroundColor: colorsByType[mainType] + "55" }]}>
+                          <Text style={styles.name}>{pokemon.name}</Text>
+                          <Text style={styles.type}>{mainType}</Text>
+                          <View style={styles.imagesRow}>
+                            <Image source={{ uri: pokemon.image }} style={styles.image} />
+                            <Image source={{ uri: pokemon.imageBack }} style={styles.image} />
                           </View>
-                        </Link>
-                      </Animated.View>
-                    );
-                  })
-                )
-            }
+                        </View>
+                      </Link>
+                    </Animated.View>
+                  );
+                })
+              )}
 
+              {loading && (
+                <ActivityIndicator
+                  size="large"
+                  style={{
+                    marginVertical: 24,
+                    flex: 1,
+                    alignSelf: "center",
+                    minHeight: 650,
+                  }}
+                />
+              )}
+            </ScrollView>
 
-
-
-
-            {loading && (
-              <ActivityIndicator
-                size="large"
-                style={{ marginVertical: 24, flex: 1, justifyContent: "center", alignItems: "center", alignSelf: "center", minHeight: 650 }}
-              />
-            )}
-          </ScrollView>
-        </Animated.View>
+          </Animated.View>
+        </View>
       )}
 
-
-
-
-      {showLanding ? (
-        <>
-          <Landing />
-        </>
-      ) : null}
-
+      {showLanding && <Landing />}
     </>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
@@ -465,7 +357,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   containerDark: {
-    // flex: 1,
     padding: 16,
     gap: 16,
     display: "flex",
@@ -489,18 +380,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   buttonTealAction: {
     backgroundColor: "#A98FF3",
     padding: 12,
     borderRadius: 8,
     marginVertical: 5,
-    // borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonTealActionDark: {
+    backgroundColor: "#1e4343ff",
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 5,
     justifyContent: 'center',
     alignItems: 'center',
   },
   buttonBrownSubtle: {
     backgroundColor: "#F7D02C",
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 5,
+  },
+  buttonBrownDeepDark: {
+    backgroundColor: "#2B211A",
     padding: 12,
     borderRadius: 8,
     marginVertical: 5,
@@ -519,23 +422,6 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     opacity: 0.8,
   },
-
-  buttonTealActionDark: {
-    backgroundColor: "#1e4343ff",
-    padding: 12,
-    borderRadius: 8,
-    marginVertical: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonBrownDeepDark: {
-    backgroundColor: "#2B211A",
-    padding: 12,
-    borderRadius: 8,
-    marginVertical: 5,
-
-  },
-
   buttonSlateSubtleDark: {
     backgroundColor: "#333",
     padding: 12,
@@ -550,15 +436,13 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     opacity: 0.7,
   },
-
   textLight: {
     color: "black",
-    textAlign: "center"
+    textAlign: "center",
   },
-
   textDark: {
     color: "white",
-    textAlign: "center"
+    textAlign: "center",
   },
   card: {
     padding: 20,
@@ -586,12 +470,58 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
   },
-
-
   input: {
     height: 40,
     borderRadius: 10,
     paddingHorizontal: 15,
     backgroundColor: "#f1f1f1",
+  },
+
+  navContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Glass effect
+    // Shadow for iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    // Elevation for Android
+    elevation: 5,
+  },
+  navContainerDark: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 12,
+    backgroundColor: '#1a202c',
+    borderWidth: 1,
+    borderColor: '#2d3748',
+  },
+
+  //  backgroundColor: "#232323ff",
+  // flexDirection: 'row',
+  // flexWrap: 'wrap',
+  // gap: 10,
+  // alignItems: 'center',
+  // justifyContent: 'center',
+
+
+  navButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    minWidth: 75,
+  },
+  navText: {
+    fontSize: 10,
+    fontWeight: '700',
+    marginTop: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });
