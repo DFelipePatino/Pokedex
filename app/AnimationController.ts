@@ -15,6 +15,7 @@ export class AnimationController {
             new Animated.Value(0), // 3
             new Animated.Value(0), // 4
             new Animated.Value(1), // 5 - search result / showButton wrapper
+            new Animated.Value(1),
         ];
         this.opacitys = [
             new Animated.Value(1), // 0 - outer wrapper + dark mode toggle
@@ -44,6 +45,13 @@ export class AnimationController {
             Animated.sequence([
                 Animated.timing(this.scales[5], { toValue: 0, duration: 5, useNativeDriver: true }),
                 Animated.timing(this.scales[5], { toValue: 1, duration: 500, useNativeDriver: true }),
+            ]).start();
+        }
+
+        if (index === 6) {
+            Animated.sequence([
+                Animated.timing(this.scales[6], { toValue: 0, duration: 5, useNativeDriver: true }),
+                Animated.timing(this.scales[6], { toValue: 1, duration: 500, useNativeDriver: true }),
             ]).start();
         }
     }

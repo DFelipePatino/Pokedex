@@ -160,7 +160,7 @@ export default function Index() {
     try {
       setLoading(true);
       setError(false);
-      opacityTransition(5);
+      opacityTransition(6);
       const response = await fetch(
         `https://pokeapi.co/api/v2/pokemon/${searchText}`
       );
@@ -231,23 +231,28 @@ export default function Index() {
               </Animated.View>
             )}
 
-            <View style={{
-              padding: 20,
-              backgroundColor: isDark ? "rgba(26, 26, 26, 0.7)" : "rgba(228, 228, 228, 0.7)",
-            }}>
-              <TextInput
-                placeholder="Search Pokemon by name or number..."
-                value={query}
-                onChangeText={setQuery}
-                placeholderTextColor={isDark ? "#f1f1f1" : "#232323ff"}
-                style={{
-                  height: 40,
-                  borderRadius: 10,
-                  paddingHorizontal: 10,
-                  backgroundColor: isDark ? "rgba(35, 35, 35, 0.6)" : "rgba(241, 241, 241, 0.6)",
-                  color: isDark ? "#f1f1f1" : "#232323ff",
-                }}
-              />
+            <View style={[styles.searchWrapper, isDark ? styles.searchWrapperDark : styles.searchWrapperLight]}>
+              <View style={[styles.searchInner, isDark ? styles.searchInnerDark : styles.searchInnerLight]}>
+                <MaterialCommunityIcons
+                  name="magnify"
+                  size={20}
+                  color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)"}
+                  style={styles.searchIcon}
+                />
+                <TextInput
+                  placeholder="Search Pokemon..."
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholderTextColor={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"}
+                  selectionColor={isDark ? "#4fd1c5" : "#319795"} // Teal accent color
+                  style={[styles.searchInput, { color: isDark ? "#fff" : "#232323" }]}
+                />
+                {query.length > 0 && (
+                  <Pressable onPress={() => setQuery('')}>
+                    <MaterialCommunityIcons name="close-circle" size={18} color={isDark ? "#fff" : "#888"} />
+                  </Pressable>
+                )}
+              </View>
             </View>
 
             <ScrollView
@@ -305,7 +310,7 @@ export default function Index() {
                       style={{
                         opacity: anim.opacitys[5],
                         flexGrow: 1,
-                        transform: [{ scale: anim.scales[5] }],
+                        transform: [{ scale: anim.scales[6] }],
                         flex: 1,
                         minHeight: 650,
                       }}
@@ -523,5 +528,49 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+
+
+  searchWrapper: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    // This creates the "floating" feel over your background
+  },
+  searchWrapperDark: {
+    backgroundColor: '#232323ff',
+  },
+  searchWrapperLight: {
+    backgroundColor: 'transparent',
+  },
+  searchInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 50, // Slightly taller for a more premium feel
+    borderRadius: 25, // Pill shape
+    paddingHorizontal: 15,
+    borderWidth: 1,
+    // Glassmorphism Shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  searchInnerDark: {
+    backgroundColor: "rgba(45, 55, 72, 0.8)", // Dark slate glass
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  searchInnerLight: {
+    backgroundColor: "rgba(255, 255, 255, 0.9)", // Pure white glass
+    borderColor: "rgba(0, 0, 0, 0.05)",
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+    height: '100%',
   },
 });
