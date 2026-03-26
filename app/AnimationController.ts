@@ -15,7 +15,8 @@ export class AnimationController {
             new Animated.Value(0), // 3
             new Animated.Value(0), // 4
             new Animated.Value(1), // 5 - search result / showButton wrapper
-            new Animated.Value(1),
+            new Animated.Value(0),
+            new Animated.Value(0),
         ];
         this.opacitys = [
             new Animated.Value(1), // 0 - outer wrapper + dark mode toggle
@@ -48,10 +49,10 @@ export class AnimationController {
             ]).start();
         }
 
-        if (index === 6) {
+        if (index === 7) {
             Animated.sequence([
-                Animated.timing(this.scales[6], { toValue: 0, duration: 5, useNativeDriver: true }),
-                Animated.timing(this.scales[6], { toValue: 1, duration: 500, useNativeDriver: true }),
+                Animated.timing(this.scales[7], { toValue: 0, duration: 5, useNativeDriver: true }),
+                Animated.timing(this.scales[7], { toValue: 1, duration: 500, useNativeDriver: true }),
             ]).start();
         }
     }
@@ -121,8 +122,8 @@ export class AnimationController {
     startEntryAnimation() {
         Animated.stagger(
             200,
-            this.scales.map(scale =>
-                Animated.timing(scale, {
+            [0, 1, 2, 3, 4, 6].map(i =>
+                Animated.timing(this.scales[i], {
                     toValue: 1,
                     duration: 300,
                     useNativeDriver: true,

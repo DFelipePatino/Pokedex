@@ -160,7 +160,7 @@ export default function Index() {
     try {
       setLoading(true);
       setError(false);
-      opacityTransition(6);
+      opacityTransition(7);
       const response = await fetch(
         `https://pokeapi.co/api/v2/pokemon/${searchText}`
       );
@@ -181,9 +181,9 @@ export default function Index() {
   };
 
   const buttons = [
-    { label: "Master", icon: "medal", action: () => router.push("/about"), color: '#4fd1c5' },
-    { label: "Create", icon: "plus-circle", action: () => router.push("/yourPokemon"), color: '#ed8936' },
-    { label: "Pokédex", icon: "book-open-variant", action: () => router.push("/savedPokemon"), color: '#63b3ed' },
+    { label: "Master", icon: "pokemon-go", action: () => router.push("/about"), color: '#4fd1c5' },
+    { label: "Create", icon: "pokeball", action: () => router.push("/yourPokemon"), color: '#ed8936' },
+    { label: "Pokédex", icon: "format-list-bulleted", action: () => router.push("/savedPokemon"), color: '#63b3ed' },
     {
       label: isDark ? "Light" : "Dark",
       icon: isDark ? "weather-sunny" : "weather-night",
@@ -231,29 +231,31 @@ export default function Index() {
               </Animated.View>
             )}
 
-            <View style={[styles.searchWrapper, isDark ? styles.searchWrapperDark : styles.searchWrapperLight]}>
-              <View style={[styles.searchInner, isDark ? styles.searchInnerDark : styles.searchInnerLight]}>
-                <MaterialCommunityIcons
-                  name="magnify"
-                  size={20}
-                  color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)"}
-                  style={styles.searchIcon}
-                />
-                <TextInput
-                  placeholder="Search Pokemon..."
-                  value={query}
-                  onChangeText={setQuery}
-                  placeholderTextColor={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"}
-                  selectionColor={isDark ? "#4fd1c5" : "#319795"} // Teal accent color
-                  style={[styles.searchInput, { color: isDark ? "#fff" : "#232323" }]}
-                />
-                {query.length > 0 && (
-                  <Pressable onPress={() => setQuery('')}>
-                    <MaterialCommunityIcons name="close-circle" size={18} color={isDark ? "#fff" : "#888"} />
-                  </Pressable>
-                )}
+            <Animated.View style={{ transform: [{ scale: anim.scales[6] }] }}>
+              <View style={[styles.searchWrapper, isDark ? styles.searchWrapperDark : styles.searchWrapperLight]}>
+                <View style={[styles.searchInner, isDark ? styles.searchInnerDark : styles.searchInnerLight]}>
+                  <MaterialCommunityIcons
+                    name="magnify"
+                    size={20}
+                    color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)"}
+                    style={styles.searchIcon}
+                  />
+                  <TextInput
+                    placeholder="Search Pokemon..."
+                    value={query}
+                    onChangeText={setQuery}
+                    placeholderTextColor={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"}
+                    selectionColor={isDark ? "#4fd1c5" : "#319795"} // Teal accent color
+                    style={[styles.searchInput, { color: isDark ? "#fff" : "#232323" }]}
+                  />
+                  {query.length > 0 && (
+                    <Pressable onPress={() => setQuery('')}>
+                      <MaterialCommunityIcons name="close-circle" size={18} color={isDark ? "#fff" : "#888"} />
+                    </Pressable>
+                  )}
+                </View>
               </View>
-            </View>
+            </Animated.View>
 
             <ScrollView
               key={1}
@@ -310,7 +312,7 @@ export default function Index() {
                       style={{
                         opacity: anim.opacitys[5],
                         flexGrow: 1,
-                        transform: [{ scale: anim.scales[6] }],
+                        transform: [{ scale: anim.scales[7] }],
                         flex: 1,
                         minHeight: 650,
                       }}
