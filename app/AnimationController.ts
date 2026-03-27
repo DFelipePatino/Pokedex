@@ -10,13 +10,14 @@ export class AnimationController {
     constructor() {
         this.scales = [
             new Animated.Value(0), // 0 - pokemon cards
-            new Animated.Value(0), // 1
-            new Animated.Value(0), // 2
-            new Animated.Value(0), // 3
-            new Animated.Value(0), // 4
-            new Animated.Value(1), // 5 - search result / showButton wrapper
-            new Animated.Value(0),
-            new Animated.Value(0),
+            new Animated.Value(0), // 1 - nav buttons
+            new Animated.Value(0), // 2 - nav buttons
+            new Animated.Value(0), // 3 - nav buttons
+            new Animated.Value(0), // 4 - nav buttons
+            new Animated.Value(1), // 5 - nav buttons wrapper
+            new Animated.Value(0), // 6 - search bar
+            new Animated.Value(1), // 7 - search result
+            new Animated.Value(1), // 8 - error message
         ];
         this.opacitys = [
             new Animated.Value(1), // 0 - outer wrapper + dark mode toggle
@@ -55,7 +56,7 @@ export class AnimationController {
         onShowButton: (val: boolean) => void,
         onShowButtonFlag: (val: boolean) => void,
     ) {
-        if (index === 1 && this.showButton && !this.showButtonFlag) {
+        if (index === -5 && this.showButton && !this.showButtonFlag) {
             this.showButtonFlag = true;
             onShowButtonFlag(true);
             setTimeout(() => {
@@ -69,7 +70,7 @@ export class AnimationController {
                 }, 130);
             }, 500);
 
-        } else if (index === 2 && !this.showButton && this.showButtonFlag) {
+        } else if (index === 5 && !this.showButton && this.showButtonFlag) {
             this.showButtonFlag = false;
             onShowButtonFlag(false);
             setTimeout(() => {
@@ -82,10 +83,16 @@ export class AnimationController {
                     onShowButton(true);
                 }, 100);
             }, 500);
-        } else if (index === 7) {
+        }
+        else if (index === 7) {
             Animated.sequence([
                 Animated.timing(this.scales[7], { toValue: 0, duration: 5, useNativeDriver: true }),
-                Animated.timing(this.scales[7], { toValue: 1, duration: 1000, useNativeDriver: true }),
+                Animated.timing(this.scales[7], { toValue: 1, duration: 150, useNativeDriver: true }),
+            ]).start();
+        } else if (index === 8) {
+            Animated.sequence([
+                Animated.timing(this.scales[8], { toValue: 0, duration: 5, useNativeDriver: true }),
+                Animated.timing(this.scales[8], { toValue: 1, duration: 150, useNativeDriver: true }),
             ]).start();
         }
     }
@@ -109,9 +116,9 @@ export class AnimationController {
         const currentY = contentOffset.y;
 
         if (currentY > this.lastScrollY && currentY > 50) {
-            this.scaleTransition(1, onShowButton, onShowButtonFlag);
+            this.scaleTransition(-5, onShowButton, onShowButtonFlag);
         } else {
-            this.scaleTransition(2, onShowButton, onShowButtonFlag);
+            this.scaleTransition(5, onShowButton, onShowButtonFlag);
         }
 
         this.lastScrollY = currentY;

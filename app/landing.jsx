@@ -1,88 +1,99 @@
-import { useEffect, useRef, useState } from "react";
-import {
-    Animated,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
-import { Stack } from "expo-router";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React from 'react';
+import { View, Text, StyleSheet, Animated, ScrollView, SafeAreaView, Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
-
-
-export default function Landing() {
-    const [isDark, setIsDark] = useState(true);
-
-    // useEffect(() => {
-    //     const timer = setTimeout(() => {
-    //         router.replace("/");
-    //     }, 2000);
-
-    //     return () => clearTimeout(timer);
-    // }, []);
-
-    const scale = useRef(new Animated.Value(0)).current;
-
-    useEffect(() => {
-        Animated.timing(scale, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-        }).start();
-    }, []);
-
-
+const Landing = () => {
+    // Mocking the 'scale' value since it was in your snippet. 
+    // If you are using a real animation, this would come from a useRef or prop.
+    const scale = new Animated.Value(1);
 
     return (
-        <>
-            <Animated.View style={{ flexGrow: 1, transform: [{ scale }] }}>
-
-                <ScrollView
-                    contentContainerStyle={[
-                        styles.container,
-                        {
-                            flexGrow: 1,
-                            backgroundColor: isDark ? "#232323ff" : backgroundColor + "33",
-                        },
-                    ]}
+        <SafeAreaView style={styles.safeArea}>
+            <Animated.View style={[styles.animatedContainer, { transform: [{ scale }] }]}>
+                <LinearGradient
+                    // Pokémon Theme: Classic Red, White, and Blue
+                    colors={['#6e0d0d', '#121212']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.gradient}
                 >
-                    <View
-
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
                     >
-                        <Text style={styles.name}>
-                            Welcom to the Pokedex App
-                        </Text>
-
-
-                    </View>
-
-                </ScrollView>
-
+                        <View style={styles.textWrapper}>
+                            <Text style={styles.name}>Welcome to the Pokedex App</Text>
+                            <Image
+                                source={{ uri: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png' }}
+                                style={styles.pokeBallIcon}
+                            />
+                            <Text style={styles.subText}>Gotta catch 'em all!</Text>
+                        </View>
+                    </ScrollView>
+                </LinearGradient>
             </Animated.View>
-        </>
+        </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
-    container: {
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#FF0000', // Fallback color
+    },
+    animatedContainer: {
+        flex: 1,
+    },
+    gradient: {
+        flex: 1,
+    },
+    scrollContent: {
         flexGrow: 1,
-        padding: 16,
-        gap: 16,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundImage: "url(wallpaper.jpg)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
-        backgroundBlendMode: "overlay",
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    textWrapper: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        // Helps text stand out against the background colors
+        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        padding: 30,
+        borderRadius: 20,
     },
     name: {
-        fontSize: 28,
-        fontWeight: "bold",
-        textTransform: "capitalize",
-        textAlign: "center",
-        color: "white",
+        fontSize: 32,
+        fontWeight: '900',
+        color: '#FFDE00',
+        textAlign: 'center',
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+        textShadowColor: 'rgba(0, 0, 0, 0.75)',
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 10,
+    },
+    divider: {
+        height: 4,
+        width: 60,
+        backgroundColor: '#FFDE00', // Classic Pokemon Yellow
+        marginVertical: 15,
+        borderRadius: 2,
+    },
+    subText: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#FFDE00',
+        fontStyle: 'italic',
+        textAlign: 'center',
+        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 5,
+    },
+    pokeBallIcon: {
+        width: 80,
+        height: 80,
+        marginBottom: 15,
     },
 });
+
+export default Landing;

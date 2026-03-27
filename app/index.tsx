@@ -86,14 +86,18 @@ export default function Index() {
     fetchPokemons();
   }, [page]);
 
+  const timer1 = 2000;
+  const timer2 = timer1 + 1500;
+  const timer3 = timer2 + 800;
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowLanding(false);
       setShowMain(true);
-    }, 1000);
+    }, timer1);
 
-    const t1 = setTimeout(() => opacityTransition(0), 2800);
-    const t2 = setTimeout(() => opacityTransition(4), 3600);
+    const t1 = setTimeout(() => opacityTransition(0), timer2);
+    const t2 = setTimeout(() => opacityTransition(4), timer3);
 
     return () => {
       clearTimeout(timer);
@@ -185,8 +189,11 @@ export default function Index() {
       setSearchedPokemon([found]);
       setError(false);
       scrollToTop();
+      anim.scaleTransition(7);
     } catch (error) {
       setError(true);
+      setSearchedPokemon([]);
+      anim.scaleTransition(8);
     } finally {
       setLoading(false);
     }
@@ -279,11 +286,11 @@ export default function Index() {
               style={{ flex: 1 }}
             >
               <View style={styles.cardGrid}>
-                {(searchedPokemon.length === 0 && query.length === 0 ? pokemons : searchedPokemon)
+                {(searchedPokemon.length === 0 && query.length === 0 ? pokemons : (!error ? searchedPokemon : []))
                   .map((pokemon, index) => {
                     const mainType = pokemon.types[0].type.name;
                     // Logic for unique animation delays if needed
-                    const animIndex = query.length === 0 ? 0 : 5;
+                    const animIndex = query.length === 0 ? 0 : 7;
 
                     return (
                       <Animated.View
@@ -328,11 +335,11 @@ export default function Index() {
               </View>
 
               {error && query.length > 0 && (
-                <View style={styles.centerBox}>
+                <Animated.View style={[styles.centerBox, { transform: [{ scale: anim.scales[8] }] }]}>
                   <Text style={[styles.errorText, { color: isDark ? "#f1f1f1" : "#232323ff" }]}>
                     No Pokémon found 😢
                   </Text>
-                </View>
+                </Animated.View>
               )}
 
               {loading && (

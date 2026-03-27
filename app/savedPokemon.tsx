@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator, Image, ScrollView, StyleSheet, Text,
-    TouchableOpacity, View, Pressable, Modal, FlatList
+    TouchableOpacity, View, Pressable, Modal, FlatList,
+    Alert
 } from "react-native";
 import { Stack, router } from "expo-router";
 import { colorsByType } from "../constants/colors";
@@ -39,9 +40,25 @@ export default function SavedPokemon() {
                 renderRightActions={() => (
                     <TouchableOpacity
                         style={styles.deleteButton}
-                        onPress={async () => {
-                            const success = await deletePokemonFromDB(item.id);
-                            if (success) setSavedList(prev => prev.filter(p => p.id !== item.id));
+                        onPress={() => {
+                            Alert.alert(
+                                "Release Pokémon",
+                                `Are you sure you want to let ${item.name} go?`,
+                                [
+                                    {
+                                        text: "Cancel",
+                                        style: "cancel",
+                                    },
+                                    {
+                                        text: "Release",
+                                        style: "destructive",
+                                        onPress: async () => {
+                                            const success = await deletePokemonFromDB(item.id);
+                                            if (success) setSavedList(prev => prev.filter(p => p.id !== item.id));
+                                        },
+                                    },
+                                ]
+                            );
                         }}
                     >
                         <Text style={styles.deleteButtonText}>RELEASE</Text>
