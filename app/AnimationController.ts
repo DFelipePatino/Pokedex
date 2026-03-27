@@ -48,13 +48,6 @@ export class AnimationController {
                 Animated.timing(this.scales[5], { toValue: 1, duration: 500, useNativeDriver: true }),
             ]).start();
         }
-
-        if (index === 7) {
-            Animated.sequence([
-                Animated.timing(this.scales[7], { toValue: 0, duration: 5, useNativeDriver: true }),
-                Animated.timing(this.scales[7], { toValue: 1, duration: 500, useNativeDriver: true }),
-            ]).start();
-        }
     }
 
     scaleTransition(
@@ -89,6 +82,11 @@ export class AnimationController {
                     onShowButton(true);
                 }, 100);
             }, 500);
+        } else if (index === 7) {
+            Animated.sequence([
+                Animated.timing(this.scales[7], { toValue: 0, duration: 5, useNativeDriver: true }),
+                Animated.timing(this.scales[7], { toValue: 1, duration: 1000, useNativeDriver: true }),
+            ]).start();
         }
     }
 

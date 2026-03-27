@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Pressable,
   Animated,
+  TouchableOpacity,
 } from "react-native";
 import { colorsByType } from "../constants/colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -58,6 +59,14 @@ export default function Index() {
     anim.opacityTransition(index, () => setIsDark(prev => !prev));
   };
 
+  // const scaleTransition = (index: number) => {  // this isnt working
+  //   anim.scaleTransition(index, () => {
+  //     setSearchedPokemon([]);
+  //     setQuery("");
+  //     setError(false);
+  //   });
+  // };
+
   const handleScroll = ({ nativeEvent }: any) => {
     anim.handleScroll(
       nativeEvent,
@@ -68,10 +77,6 @@ export default function Index() {
     );
   };
 
-  const getButtonStyle = () => {
-    if (isDark) return styles.buttonSlateSubtleDark;
-    return styles.buttonSlateInfo;
-  };
 
   useEffect(() => {
     AsyncStorage.setItem('theme', isDark ? 'dark' : 'light');
@@ -155,12 +160,18 @@ export default function Index() {
     }
   }
 
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const scrollToTop = () => {
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
   const fetchData = async (searchText: string) => {
     if (loading) return;
     try {
       setLoading(true);
       setError(false);
-      opacityTransition(7);
+      // anim.scaleTransition(7); // this isnt working
       const response = await fetch(
         `https://pokeapi.co/api/v2/pokemon/${searchText}`
       );
@@ -173,6 +184,7 @@ export default function Index() {
       };
       setSearchedPokemon([found]);
       setError(false);
+      scrollToTop();
     } catch (error) {
       setError(true);
     } finally {
@@ -258,6 +270,7 @@ export default function Index() {
             </Animated.View>
 
             <ScrollView
+              ref={scrollViewRef}
               key={1}
               // Use the new gradient-ready styles
               contentContainerStyle={isDark ? styles.containerDark : styles.container}
@@ -358,7 +371,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#4b0c0cff",
     padding: 16,
     paddingBottom: 100, // Extra space for bottom nav if exists
-    flex: 1,
+    minHeight: 1000,
+    // flex: 1,
   },
   cardGrid: {
     gap: 16,
