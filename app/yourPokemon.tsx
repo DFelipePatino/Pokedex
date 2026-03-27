@@ -20,24 +20,56 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { savePokemonToDB } from "../utils/database";
 
 const LOCATION_LIST = [
-    "berry forest-area", "bond bridge-area", "cerulean city-area", "five isle-meadow-area",
-    "kanto route-1-area", "kanto route-2-north-towards-pewter-city", "kanto route-2-south-towards-viridian-city",
-    "kanto route-3-area", "kanto route-4-area", "kanto route-5-area", "kanto route-6-area",
-    "kanto route-7-area", "kanto route-8-area", "kanto route-9-area", "kanto route-10-area",
-    "kanto route-11-area", "kanto route-12-area", "kanto route-13-area", "kanto route-14-area",
-    "kanto route-15-area", "kanto route-16-area", "kanto route-17-area", "kanto route-18-area",
-    "kanto route-22-area", "kanto route-23-area", "kanto route-24-area", "kanto route-25-area",
-    "kanto route-26-area", "kanto route-27-area", "kanto sea-route-19-area", "kanto sea-route-20-area",
-    "kanto sea-route-21-area", "pallet town-area", "pattern bush-area", "viridian forest-area",
-    "azalea town-area", "ilex forest-area", "johto route-29-area", "johto route-30-area",
-    "johto route-31-area", "johto route-32-area", "johto route-34-area", "johto route-35-area",
-    "johto route-36-area", "johto route-37-area", "johto route-38-area", "johto route-39-area",
-    "johto safari-zone-zone-forest", "lake of-rage-area", "national park-area", "eterna forest-area",
-    "sinnoh route-204-north-towards-floaroma-town", "sinnoh route-204-south-towards-jubilife-city",
-    "sinnoh route-229-area", "kalos route-2-area", "kalos route-3-area", "lumiose city-area",
-    "santalune forest-area", "alola route-1-east", "alola route-1-south", "alola route-1-west",
-    "alola route-2-main", "alola route-5-area", "lush jungle-north", "lush jungle-south",
-    "lush jungle-west", "melemele meadow-area", "unknown all-bugs-area"
+    // --- Kanto & Sevii Islands ---
+    "Viridian Forest",
+    "Cerulean City Waterfront",
+    "Seafoam Islands (Ice Grotto)",
+    "Silph Co. Headquarters",
+    "Victory Road (Kanto)",
+    "Berry Forest",
+    "Bond Bridge Cliffs",
+    "Five Isle Meadow",
+    "Pattern Bush",
+    "Mt. Ember Peak",
+    "Pallet Town Lagoon",
+
+    // --- Johto ---
+    "Azalea Town (Slowpoke Well)",
+    "Ilex Forest Shrine",
+    "Lake of Rage",
+    "National Park (Bug Contest)",
+    "Goldenrod Radio Tower",
+    "Johto Safari Zone (Wetlands)",
+    "Mt. Silver Foothills",
+    "Dragon's Den",
+
+    // --- Sinnoh ---
+    "Eterna Forest (Old Chateau)",
+    "Floaroma Meadow",
+    "Mt. Coronet Summit",
+    "Spear Pillar",
+    "Sinnoh Route 229 (Tropical Resort)",
+    "Sendoff Spring",
+
+    // --- Kalos ---
+    "Santalune Forest",
+    "Lumiose City Badlands",
+    "Tower of Mastery",
+    "Azure Bay",
+    "Kalos Route 2 (Avance Trail)",
+
+    // --- Alola ---
+    "Melemele Meadow",
+    "Lush Jungle (Deep Canopy)",
+    "Mount Lanakila",
+    "Aether Paradise",
+    "Exeggutor Island",
+    "Hano Grand Resort",
+
+    // --- Special/Rare ---
+    "Distortion World Border",
+    "Digital Glitch Zone",
+    "Unknown Ancient Ruins"
 ];
 
 
@@ -58,9 +90,9 @@ export default function YourPokemon() {
 
     const selectedType = newPokemon.type
         ? newPokemon.type.toLowerCase()
-        : 'water';
+        : 'steel';
 
-    const backgroundColor = colorsByType[selectedType] || colorsByType['water'];
+    const backgroundColor = colorsByType[selectedType] || colorsByType['steel'];
 
     useEffect(() => {
         AsyncStorage.getItem('theme').then((value) => {
@@ -78,9 +110,46 @@ export default function YourPokemon() {
         const locationsStr = Array.isArray(whereToFind) ? whereToFind.join(", ") : whereToFind;
 
         if (name && type && locationsStr.length > 0 && abilitiesStr.length > 0 && movesStr.length > 0) {
-            setPrompt(`${name} is a ${type} pokemon that is found in ${locationsStr} and has the abilities ${abilitiesStr} and moves ${movesStr} in the style of pokemon official artwork`);
+            setPrompt(`${name} is a ${type} pokemon that is found in ${locationsStr} and has the abilities ${abilitiesStr} and moves ${movesStr}. Create a unique pokemon never seen before in the style of pokemon official artwork located in ${locationsStr}`);
         }
     }, [newPokemon]);
+
+    const randomizePokemon = () => {
+        // Wait for formData to be loaded first
+        if (!formData.types.length || !formData.abilities.length || !formData.moves.length) return;
+
+        // Random type
+        const randomType = formData.types[Math.floor(Math.random() * formData.types.length)];
+
+        // Random locations (1-3)
+        const locationCount = Math.floor(Math.random() * 3) + 1;
+        const shuffledLocations = [...LOCATION_LIST].sort(() => Math.random() - 0.5);
+        const randomLocations = shuffledLocations.slice(0, locationCount).map(loc => ({ name: loc }));
+
+        // Random abilities (1-2)
+        const abilityCount = Math.floor(Math.random() * 2) + 1;
+        const shuffledAbilities = [...formData.abilities].sort(() => Math.random() - 0.5);
+        const randomAbilities = shuffledAbilities.slice(0, abilityCount).map(a => ({ name: a.value }));
+
+        // Random moves (2-4)
+        const moveCount = Math.floor(Math.random() * 3) + 2;
+        const shuffledMoves = [...formData.moves].sort(() => Math.random() - 0.5);
+        const randomMoves = shuffledMoves.slice(0, moveCount).map(m => ({ name: m.value }));
+
+        // Random name from type + random suffix
+        const suffixes = ["saur", "zard", "rtle", "puff", "chu", "dex", "vee", "ryu", "gon", "eon"];
+        const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+        const randomName = randomType.value.charAt(0).toUpperCase() + randomType.value.slice(1) + randomSuffix;
+
+        setNewPokemon({
+            name: randomName,
+            type: randomType.value,
+            whereToFind: randomLocations,
+            abilities: randomAbilities,
+            moves: randomMoves,
+        });
+    };
+
 
     const generateImage = () => {
         if (!prompt.trim()) return;
@@ -90,7 +159,8 @@ export default function YourPokemon() {
         const seed = Math.floor(Math.random() * 1000000);
         const myApiKey = process.env.EXPO_PUBLIC_POLLINATIONS_API_KEY || "";
         const models = ["zimage", "flux"];
-        const randomModel = models[Math.floor(Math.random() * models.length)];
+        // const randomModel = models[Math.floor(Math.random() * models.length)];
+        const randomModel = models[1];
 
         const url = `https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=${randomModel}&width=1024&height=1024&seed=${seed}&nologo=true&key=${myApiKey}`;
         setImageUrl(url);
@@ -287,6 +357,15 @@ export default function YourPokemon() {
                         />
 
                         <TouchableOpacity
+                            style={[styles.button, (loading) && styles.buttonDisabled]}
+                            onPress={randomizePokemon}
+                            disabled={loading}
+                        >
+                            <Text style={styles.buttonText}>
+                                Randomize Pokemon
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
                             style={[styles.button, (!prompt || loading) && styles.buttonDisabled]}
                             onPress={generateImage}
                             disabled={loading || !prompt}
@@ -410,10 +489,10 @@ const styles = StyleSheet.create({
     typeText: { fontSize: 18, fontWeight: "bold", color: "rgba(255,255,255,0.8)", textAlign: "center", marginBottom: 10, textTransform: 'capitalize' },
     imagesRow: { alignItems: "center", marginVertical: 10 },
 
-    aiSection: { padding: 20, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20, flex: 1 },
+    aiSection: { padding: 20, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20, flex: 1, marginBottom: 300 },
     aiTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
     input: { backgroundColor: '#fff', borderRadius: 12, padding: 15, marginBottom: 10, fontSize: 16 },
-    button: { backgroundColor: '#007AFF', padding: 16, borderRadius: 12, alignItems: 'center' },
+    button: { backgroundColor: '#007AFF', padding: 16, borderRadius: 12, alignItems: 'center', marginBottom: 10 },
     buttonDisabled: { backgroundColor: '#aaa' },
     buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 
@@ -476,6 +555,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 1.41,
         elevation: 2,
+        marginBottom: 10,
     },
     textSelectedStyle: {
         marginRight: 5,

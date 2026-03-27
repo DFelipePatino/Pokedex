@@ -1,21 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    Pressable,
-    Modal,
-    FlatList
+    ActivityIndicator, Image, ScrollView, StyleSheet, Text,
+    TouchableOpacity, View, Pressable, Modal, FlatList
 } from "react-native";
 import { Stack, router } from "expo-router";
 import { colorsByType } from "../constants/colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getSavedPokemon, deletePokemonFromDB } from "../utils/database";
 import { Swipeable } from 'react-native-gesture-handler';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SavedPokemon() {
     const [isDark, setIsDark] = useState(false);
@@ -28,20 +21,18 @@ export default function SavedPokemon() {
         AsyncStorage.getItem('theme').then((value) => {
             setIsDark(value === 'dark');
         });
-    }, []);
-
-    useEffect(() => {
-        const fetchSaved = async () => {
-            const data = await getSavedPokemon();
-            setSavedList(data);
-            setLoading(false);
-        };
         fetchSaved();
     }, []);
 
+    const fetchSaved = async () => {
+        const data = await getSavedPokemon();
+        setSavedList(data);
+        setLoading(false);
+    };
+
     const renderPokemonItem = ({ item }: { item: any }) => {
         const itemType = item.type ? item.type.toLowerCase() : 'water';
-        const cardColor = colorsByType[itemType] || colorsByType['water'];
+        const typeColor = colorsByType[itemType] || colorsByType['water'];
 
         return (
             <Swipeable
@@ -50,24 +41,31 @@ export default function SavedPokemon() {
                         style={styles.deleteButton}
                         onPress={async () => {
                             const success = await deletePokemonFromDB(item.id);
-                            if (success) {
-                                setSavedList(prev => prev.filter(p => p.id !== item.id));
-                            }
+                            if (success) setSavedList(prev => prev.filter(p => p.id !== item.id));
                         }}
                     >
-                        <Text style={styles.deleteButtonText}>Delete</Text>
+                        <Text style={styles.deleteButtonText}>RELEASE</Text>
                     </TouchableOpacity>
                 )}
             >
                 <TouchableOpacity
-                    style={[styles.listItem, { backgroundColor: cardColor + "44" }]}
+                    activeOpacity={0.8}
+                    style={[
+                        styles.listItem,
+                        { backgroundColor: isDark ? typeColor + "80" : typeColor + "55" },
+                        { borderColor: typeColor + "55" }
+                    ]}
                     onPress={() => setSelectedPokemon(item)}
                 >
+                    <View style={[styles.typeHighlight, { backgroundColor: typeColor }]} />
                     <Image source={{ uri: item.imageUrl }} style={styles.thumbnail} />
                     <View style={styles.listTextContainer}>
-                        <Text style={styles.listName}>{item.name}</Text>
-                        <Text style={styles.listType}>{item.type}</Text>
+                        <Text style={[styles.listName, { color: isDark ? '#fff' : '#232323' }]}>{item.name}</Text>
+                        <View style={[styles.typeBadge, { backgroundColor: typeColor }]}>
+                            <Text style={styles.typeBadgeText}>{item.type}</Text>
+                        </View>
                     </View>
+                    <Text style={{ color: isDark ? '#666' : '#ccc', fontSize: 20 }}>›</Text>
                 </TouchableOpacity>
             </Swipeable>
         );
@@ -75,186 +73,136 @@ export default function SavedPokemon() {
 
     const renderSelectedPokemon = () => {
         if (!selectedPokemon) return null;
-
-        const selectedType = selectedPokemon.type ? selectedPokemon.type.toLowerCase() : 'water';
-        const backgroundColor = colorsByType[selectedType] || colorsByType['water'];
+        const typeColor = colorsByType[selectedPokemon.type?.toLowerCase()] || colorsByType['water'];
 
         return (
-            <Modal visible={!!selectedPokemon} animationType="slide">
-                <View style={[styles.modalOverlay, { backgroundColor: backgroundColor + "33" }]}>
-                    <ScrollView contentContainerStyle={styles.scrollModalContent}>
-                        <View style={[styles.card, { backgroundColor: backgroundColor + "33" }]}>
-                            <TouchableOpacity
-                                style={styles.closeButton}
-                                onPress={() => setSelectedPokemon(null)}
-                            >
-                                <Text style={styles.closeButtonText}>✕</Text>
-                            </TouchableOpacity>
+            <Modal visible={!!selectedPokemon} animationType="slide" transparent={true}>
+                <View style={styles.modalOverlay}>
+                    <LinearGradient
+                        colors={isDark ? [typeColor, typeColor + "98"] : [typeColor, typeColor + "10"]}
+                        style={styles.modalContent}
+                    >
+                        <View style={styles.modalHandle} />
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setSelectedPokemon(null)}>
+                            <Text style={styles.closeButtonText}>✕</Text>
+                        </TouchableOpacity>
 
-                            <Text style={styles.name}>{selectedPokemon.name}</Text>
-                            <Text style={styles.typeText}>{selectedPokemon.type}</Text>
-
-                            <View style={styles.imagesRow}>
-                                <Pressable onPress={() => setImageVisible(true)} style={styles.imageContainer}>
-                                    <Image
-                                        source={{ uri: selectedPokemon.imageUrl }}
-                                        style={styles.generatedImage}
-                                    />
-                                </Pressable>
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            <Text style={[styles.modalName, { color: isDark ? '#fff' : '#232323' }]}>{selectedPokemon.name}</Text>
+                            <View style={[styles.typeBadge, { backgroundColor: typeColor, alignSelf: 'center', marginBottom: 20 }]}>
+                                <Text style={styles.typeBadgeText}>{selectedPokemon.type}</Text>
                             </View>
 
-                            <View style={styles.infoContainer}>
-                                <Text style={styles.sectionTitle}>Where to be found</Text>
-                                <View style={styles.infoList}>
-                                    <Text style={styles.moveText}>{selectedPokemon.whereToFind}</Text>
+                            <Pressable onPress={() => setImageVisible(true)} style={styles.imageContainer}>
+                                <View style={[styles.imageCircle, { backgroundColor: typeColor + '20' }]} />
+                                <Image
+                                    source={{ uri: selectedPokemon.imageUrl }}
+                                    style={styles.modalImage}
+                                    pointerEvents="none"
+                                />
+                            </Pressable>
+
+                            {[
+                                { title: "Habitat", value: selectedPokemon.whereToFind },
+                                { title: "Abilities", value: selectedPokemon.abilities },
+                                { title: "Moves", value: selectedPokemon.moves }
+                            ].map((section, idx) => (
+                                <View key={idx} style={styles.infoSection}>
+                                    <Text style={[styles.sectionTitle, { color: typeColor }]}>{section.title}</Text>
+                                    <View style={[styles.infoBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#fff' }]}>
+                                        <Text style={[styles.infoText, { color: isDark ? '#ddd' : '#444' }]}>{section.value || "Not found"}</Text>
+                                    </View>
                                 </View>
-                            </View>
+                            ))}
+                        </ScrollView>
 
-                            <View style={styles.infoContainer}>
-                                <Text style={styles.sectionTitle}>Abilities</Text>
-                                <View style={styles.infoList}>
-                                    <Text style={styles.moveText}>{selectedPokemon.abilities}</Text>
-                                </View>
-                            </View>
+                        <Modal visible={imageVisible} transparent animationType="fade">
+                            <Pressable style={styles.fullScreenOverlay} onPress={() => setImageVisible(false)}>
+                                <Image
+                                    source={{ uri: selectedPokemon.imageUrl }}
+                                    style={styles.fullImage}
+                                    resizeMode="contain"
+                                />
+                            </Pressable>
+                        </Modal>
 
-                            <View style={styles.infoContainer}>
-                                <Text style={styles.sectionTitle}>Moves</Text>
-                                <View style={styles.infoList}>
-                                    <Text style={styles.moveText}>{selectedPokemon.moves}</Text>
-                                </View>
-                            </View>
-                        </View>
-                    </ScrollView>
+                    </LinearGradient>
                 </View>
-                <Modal visible={imageVisible} transparent animationType="fade">
-                    <Pressable style={styles.modalContainer} onPress={() => setImageVisible(false)}>
-                        <Image
-                            source={{ uri: selectedPokemon.imageUrl }}
-                            style={styles.generatedImage}
-                            resizeMode="contain"
-                        />
-                    </Pressable>
-                </Modal>
             </Modal>
-
-
         );
     };
 
     return (
-        <>
+        <View style={{ flex: 1 }}>
             <Stack.Screen options={{ title: "My Pokédex" }} />
-            <View style={[styles.container, { backgroundColor: isDark ? "#232323" : "#f0f0f0" }]}>
-                {loading ? (
-                    <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 50 }} />
-                ) : savedList.length === 0 ? (
-                    <View style={styles.emptyContainer}>
-                        <Text style={[styles.emptyText, { color: isDark ? '#ccc' : '#666' }]}>
-                            You haven't saved any Pokémon yet!
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.createButton}
-                            onPress={() => router.push("/yourPokemon")}
-                        >
-                            <Text style={styles.createButtonText}>Go Create One</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <FlatList
-                        data={savedList}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={renderPokemonItem}
-                        contentContainerStyle={styles.listContainer}
-                    />
-                )}
-            </View>
+            <LinearGradient
+                colors={isDark ? ['#6e0d0d', '#121212'] : ['#f0f0f0', '#ffffff']}
+                style={StyleSheet.absoluteFill}
+            />
+
+            {loading ? (
+                <ActivityIndicator size="large" color="#ee1515" style={{ marginTop: 50 }} />
+            ) : savedList.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                    <Text style={[styles.emptyText, { color: isDark ? '#fff' : '#666' }]}>Your PC Storage is empty!</Text>
+                    <TouchableOpacity style={styles.createButton} onPress={() => router.push("/yourPokemon")}>
+                        <Text style={styles.createButtonText}>Start Exploring</Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                <FlatList
+                    data={savedList}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={renderPokemonItem}
+                    contentContainerStyle={styles.listContainer}
+                />
+            )}
 
             {renderSelectedPokemon()}
-
-            {/* Full Screen Image Modal */}
-            <Modal visible={imageVisible} transparent animationType="fade">
-                <Pressable style={styles.fullScreenModal} onPress={() => setImageVisible(false)}>
-                    <Image source={{ uri: selectedPokemon?.imageUrl }} style={styles.fullImage} resizeMode="contain" />
-                </Pressable>
-            </Modal>
-        </>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1 },
-    listContainer: { padding: 16 },
+    listContainer: { padding: 16, paddingBottom: 40 },
     listItem: {
         flexDirection: 'row',
-        padding: 12,
-        borderRadius: 15,
-        marginBottom: 12,
+        borderRadius: 20,
+        marginBottom: 16,
         alignItems: 'center',
-        elevation: 3,
+        padding: 12,
+        borderWidth: 1,
+        overflow: 'hidden',
+        elevation: 4,
         shadowColor: '#000',
         shadowOpacity: 0.1,
-        shadowRadius: 5,
+        shadowRadius: 8,
     },
-    thumbnail: { width: 70, height: 70, borderRadius: 35, backgroundColor: 'rgba(255,255,255,0.3)' },
-    listTextContainer: { marginLeft: 15, justifyContent: 'center' },
-    listName: { fontSize: 22, fontWeight: 'bold', color: '#fff', textTransform: 'capitalize' },
-    listType: { fontSize: 16, color: 'rgba(255,255,255,0.8)', textTransform: 'capitalize' },
-    deleteButton: {
-        backgroundColor: '#ff3b30',
-        justifyContent: 'center',
-        alignItems: 'center',
-        width: 80,
-        borderRadius: 15,
-        marginBottom: 12,
-        marginLeft: 10,
-    },
-    deleteButtonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
-
-    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-    emptyText: { fontSize: 18, marginBottom: 20, textAlign: 'center' },
-    createButton: { backgroundColor: '#007AFF', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 10 },
-    createButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-
-    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center' },
-    scrollModalContent: { padding: 20, flexGrow: 1, justifyContent: 'center' },
-
-    card: { padding: 20, borderRadius: 25, elevation: 10, shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 15, position: 'relative' },
-    closeButton: { position: 'absolute', top: 15, right: 15, zIndex: 10, backgroundColor: 'rgba(0,0,0,0.2)', width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center' },
-    closeButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-
-    name: { fontSize: 32, fontWeight: "bold", textAlign: "center", color: '#fff', textTransform: 'capitalize', marginTop: 10 },
-    typeText: { fontSize: 18, fontWeight: "bold", color: "rgba(255,255,255,0.8)", textAlign: "center", marginBottom: 10, textTransform: 'capitalize' },
-    imagesRow: { alignItems: "center", marginVertical: 10 },
-    imageContainer: {
-        width: 250,
-        height: 250,
-        backgroundColor: 'rgba(255,255,255,0.2)',
-        borderRadius: 125,
-        overflow: 'hidden',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    generatedImage: {
-        width: "100%",
-        height: "100%",
-    },
-    infoContainer: { marginTop: 20 },
-    sectionTitle: { fontSize: 20, fontWeight: "bold", color: '#fff', marginBottom: 5 },
-    infoList: { backgroundColor: 'rgba(255,255,255,0.2)', padding: 12, borderRadius: 15 },
-    moveText: { fontSize: 16, color: '#fff' },
-
-    fullScreenModal: { flex: 1, backgroundColor: "rgba(0,0,0,0.9)", justifyContent: "center", alignItems: "center" },
-    fullImage: { width: "100%", height: "100%" },
-
-    modalContainer: { flex: 1, backgroundColor: "rgba(0,0,0,0.9)", justifyContent: "center", alignItems: "center" },
-    fullImage: { width: "100%", height: "100%" },
-    dropdown: {
-        height: 50,
-        backgroundColor: 'white',
-        borderRadius: 12,
-        paddingHorizontal: 8,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        marginBottom: 10,
-    },
+    typeHighlight: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 6 },
+    thumbnail: { width: 70, height: 70, resizeMode: 'contain', borderRadius: 15 },
+    listTextContainer: { flex: 1, marginLeft: 15 },
+    listName: { fontSize: 20, fontWeight: '900', textTransform: 'capitalize' },
+    typeBadge: { paddingHorizontal: 10, paddingVertical: 2, borderRadius: 6, alignSelf: 'flex-start' },
+    typeBadgeText: { fontSize: 11, color: '#fff', fontWeight: 'bold', textTransform: 'uppercase' },
+    deleteButton: { backgroundColor: '#ff3b30', justifyContent: 'center', alignItems: 'center', width: 90, borderRadius: 20, marginBottom: 16, marginLeft: 10 },
+    deleteButtonText: { color: 'white', fontWeight: 'bold', fontSize: 12 },
+    emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    emptyText: { fontSize: 18, fontWeight: '700', marginBottom: 20 },
+    createButton: { backgroundColor: '#ee1515', paddingHorizontal: 25, paddingVertical: 12, borderRadius: 25 },
+    createButtonText: { color: '#fff', fontWeight: 'bold' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+    modalContent: { height: '85%', borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: 20 },
+    modalHandle: { width: 40, height: 4, backgroundColor: 'rgba(150,150,150,0.4)', borderRadius: 2, alignSelf: 'center', marginBottom: 10 },
+    closeButton: { position: 'absolute', top: 20, right: 20, zIndex: 10, backgroundColor: 'rgba(0,0,0,0.1)', width: 30, height: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center' },
+    closeButtonText: { color: '#888', fontWeight: 'bold' },
+    modalName: { fontSize: 30, fontWeight: '900', textAlign: 'center', textTransform: 'capitalize', marginTop: 10 },
+    imageContainer: { width: '100%', height: 220, justifyContent: 'center', alignItems: 'center' },
+    imageCircle: { position: 'absolute', width: 180, height: 180, borderRadius: 90 },
+    modalImage: { width: 200, height: 200, borderRadius: 70 },
+    infoSection: { marginTop: 15 },
+    sectionTitle: { fontSize: 14, fontWeight: '900', textTransform: 'uppercase', marginBottom: 5, marginLeft: 5 },
+    infoBox: { padding: 15, borderRadius: 18, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+    infoText: { fontSize: 15, lineHeight: 22 },
+    fullScreenOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.95)', justifyContent: 'center', alignItems: 'center' },
+    fullImage: { width: '90%', height: '70%' }
 });
