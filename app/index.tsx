@@ -41,9 +41,8 @@ export default function Index() {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-  const [showLanding, setShowLanding] = useState(true);
-  const [showMain, setShowMain] = useState(false);
+  const [isDark, setIsDark] = useState(true);
+  const [isReady, setIsReady] = useState(false);
   const [showButton, setShowButton] = useState(true);
   const [showButtonFlag, setShowButtonFlag] = useState(false);
   const [searchedPokemon, setSearchedPokemon] = useState<Pokemon[]>([]);
@@ -59,13 +58,6 @@ export default function Index() {
     anim.opacityTransition(index, () => setIsDark(prev => !prev));
   };
 
-  // const scaleTransition = (index: number) => {  // this isnt working
-  //   anim.scaleTransition(index, () => {
-  //     setSearchedPokemon([]);
-  //     setQuery("");
-  //     setError(false);
-  //   });
-  // };
 
   const handleScroll = ({ nativeEvent }: any) => {
     anim.handleScroll(
@@ -87,30 +79,25 @@ export default function Index() {
   }, [page]);
 
   const timer1 = 2000;
-  const timer2 = timer1 + 1500;
-  const timer3 = timer2 + 800;
+  const timer2 = timer1 - 600;
+  const timer3 = timer2 + 500;
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShowLanding(false);
-      setShowMain(true);
+      setIsReady(true);
     }, timer1);
 
-    const t1 = setTimeout(() => opacityTransition(0), timer2);
-    const t2 = setTimeout(() => opacityTransition(4), timer3);
 
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
+
   }, []);
 
   useEffect(() => {
-    if (showMain) {
+    if (isReady) {
       anim.startEntryAnimation();
     }
-  }, [showMain]);
+    setTimeout(() => opacityTransition(0), timer2);
+    setTimeout(() => opacityTransition(4), timer3);
+  }, [isReady]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -213,9 +200,9 @@ export default function Index() {
 
   return (
     <>
-      {!showLanding && (
-        <View style={{ flex: 1, height: '100vh' }}>
-          <Animated.View style={{ opacity: anim.opacitys[0], flex: 1 }}>
+      {isReady ? (
+        <View style={{ flex: 1 }}>
+          <Animated.View style={{ flex: 1, opacity: anim.opacitys[0] }}>
 
             {showButton && (
               <Animated.View style={[
@@ -349,9 +336,10 @@ export default function Index() {
 
           </Animated.View>
         </View>
-      )}
 
-      {showLanding && <Landing />}
+      ) : null}
+
+      {!isReady && <Landing />}
     </>
   );
 }

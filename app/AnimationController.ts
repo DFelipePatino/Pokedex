@@ -39,8 +39,8 @@ export class AnimationController {
 
         } else if (index === 4) {
             Animated.sequence([
-                Animated.timing(this.opacitys[4], { toValue: 0, duration: 300, useNativeDriver: true }),
-                Animated.timing(this.opacitys[4], { toValue: 1, duration: 300, useNativeDriver: true }),
+                Animated.timing(this.opacitys[4], { toValue: 0, duration: 200, useNativeDriver: true }),
+                Animated.timing(this.opacitys[4], { toValue: 1, duration: 200, useNativeDriver: true }),
             ]).start();
 
         } else if (index === 5) {

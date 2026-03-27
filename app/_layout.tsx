@@ -15,11 +15,11 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack initialRouteName="landing">
-        <Stack.Screen
+      <Stack>
+        {/* <Stack.Screen
           name="landing"
           options={{ title: "Landing" }}
-        />
+        /> */}
 
         <Stack.Screen
           name="index"
